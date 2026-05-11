@@ -100,7 +100,7 @@
                       [class.full]="showing.available_seats === 0"
                       (click)="selectShowing(showing)"
                     >
-                      <div class="time">{{ showing.time }}</div>
+                      <div class="time">{{ showing.starts_at | date:'HH:mm' }}</div>
                       <div class="seats">{{ showing.available_seats }} posti</div>
                       <div class="price">€ 10.00</div>
                     </div>
@@ -112,14 +112,14 @@
             <!-- Seat Selector -->
             @if (showSeatSelector && selectedShowing) {
               <div class="seat-selector">
-                <h3>Seleziona Posti per {{ selectedShowing.time }}</h3>
+                <h3>Seleziona Posti per {{ selectedShowing.starts_at | date:'HH:mm' }}</h3>
                 
                 <div class="screen">
                   <div class="screen-label">SCHERMO</div>
                 </div>
 
                 <div class="seats-grid">
-                  @for (rowLetter of ['A', 'B', 'C', 'D', 'E', 'F']; track rowLetter) {
+                  @for (rowLetter of seatRows; track rowLetter) {
                     <div class="seat-row">
                       @for (s of getSeatsForRow(rowLetter); track s.id) {
                         <div
@@ -173,7 +173,7 @@
                       <span>Elaborazione...</span>
                     }
                   </button>
-                  <button (click)="showSeatSelector = false" class="cancel-button">
+                  <button (click)="cancelSelection()" class="cancel-button">
                     Annulla
                   </button>
                 </div>

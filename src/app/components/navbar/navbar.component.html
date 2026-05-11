@@ -14,7 +14,12 @@
 
     <ul class="nav-menu" [class.active]="isMenuOpen">
       <li class="nav-item">
-        <a routerLink="/" routerLinkActive="active" (click)="closeMenu()">
+        <a
+          routerLink="/"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          (click)="closeMenu()"
+        >
           Home
         </a>
       </li>

@@ -27,6 +27,8 @@ export class MovieDetailsComponent implements OnInit {
   // Selezione posti
   seats: Seat[] = [];
   selectedSeats: string[] = [];
+  seatRows: string[] = [];
+  seatsPerRow = 20;
   showSeatSelector = false;
   bookingLoading = false;
 
@@ -85,7 +87,18 @@ export class MovieDetailsComponent implements OnInit {
     this.showingsLoading = true;
     this.movieService.getScreenings(this.movieId).subscribe({
       next: (data) => {
-        this.showings = data;
+        // Filtriamo gli orari in base alla data selezionata
+        this.showings = data.filter(showing => {
+          const date = new Date(showing.starts_at);
+          const localDateString = date.getFullYear() + '-' + 
+            String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+            String(date.getDate()).padStart(2, '0');
+          return localDateString === this.selectedDate;
+        });
+
+        // Ordiniamo gli orari cronologicamente
+        this.showings.sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime());
+
         this.showingsLoading = false;
       },
       error: (err) => {
@@ -99,35 +112,59 @@ export class MovieDetailsComponent implements OnInit {
   selectShowing(showing: Screening): void {
     this.selectedShowing = showing;
     this.selectedSeats = [];
-    this.generateSeats(showing.available_seats);
+    this.generateSeats(showing);
     this.showSeatSelector = true;
+
+    // Scroll automatico fluido verso la selezione dei posti
+    setTimeout(() => {
+      const seatSelector = document.querySelector('.seat-selector');
+      if (seatSelector) {
+        seatSelector.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
   }
 
-  generateSeats(available: number): void {
-    const rows = ['A', 'B', 'C', 'D', 'E', 'F'];
-    const seatsPerRow = 10;
+  generateSeats(showing: Screening): void {
+    // Posti fissi a 260 per supportare sale più grandi (es. 250 posti)
+    const capacity = 260;
+    const available = Math.min(showing.available_seats, capacity);
+    const occupied = capacity - available;
+
+    this.seatsPerRow = 20;
+    const numRows = 13; // 20 posti * 13 file = 260 posti fissi
+
+    this.seatRows = Array.from({ length: numRows }, (_, i) => String.fromCharCode(65 + i));
+
+    // Genera un array per la disponibilità distribuendo casualmente i posti occupati
+    const seatAvailability = Array(capacity).fill(true);
+    let occupiedCount = 0;
+    while (occupiedCount < occupied) {
+      const randomIndex = Math.floor(Math.random() * capacity);
+      if (seatAvailability[randomIndex]) {
+        seatAvailability[randomIndex] = false;
+        occupiedCount++;
+      }
+    }
+
     this.seats = [];
     let seatCount = 0;
 
-    for (const row of rows) {
-      for (let i = 1; i <= seatsPerRow; i++) {
-        seatCount++;
+    for (const row of this.seatRows) {
+      for (let i = 1; i <= this.seatsPerRow; i++) {
         this.seats.push({
           id: `${row}${i}`,
           row: row,
           number: i,
-          available: seatCount <= available,
+          available: seatAvailability[seatCount],
           selected: false
         });
+        seatCount++;
       }
     }
   }
 
   getSeatsForRow(rowLetter: string): Seat[] {
-    const rowIndex = rowLetter.charCodeAt(0) - 65;
-    const start = rowIndex * 10;
-    const end = start + 10;
-    return this.seats.slice(start, end);
+    return this.seats.filter(s => s.row === rowLetter);
   }
 
   toggleSeat(seat: Seat): void {
@@ -157,13 +194,15 @@ export class MovieDetailsComponent implements OnInit {
       seats: this.selectedSeats
     };
 
+    const formattedTime = new Date(this.selectedShowing!.starts_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+
     this.movieService.bookSeats(bookingData).subscribe({
       next: (response) => {
         this.bookingSummary = {
           confirmed: true,
           movie: this.movie!.title,
           date: this.selectedDate,
-          time: this.selectedShowing!.time,
+          time: formattedTime,
           seats: this.selectedSeats,
           totalPrice: this.selectedSeats.length * 10,
           confirmationCode: response.booking_id || 'BK' + Date.now()
@@ -178,7 +217,7 @@ export class MovieDetailsComponent implements OnInit {
           confirmed: false,
           movie: this.movie!.title,
           date: this.selectedDate,
-          time: this.selectedShowing!.time,
+          time: formattedTime,
           seats: this.selectedSeats,
           totalPrice: this.selectedSeats.length * 10,
           error: 'Errore nella prenotazione. Riprova più tardi.'
@@ -187,6 +226,12 @@ export class MovieDetailsComponent implements OnInit {
         this.bookingLoading = false;
       }
     });
+  }
+
+  cancelSelection(): void {
+    this.showSeatSelector = false;
+    this.selectedShowing = null;
+    this.selectedSeats = [];
   }
 
   goBack(): void {

@@ -1,10 +1,10 @@
 .movie-list-container {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: #121212;
 }
 
 .page-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #004d40 0%, #00796b 100%);
   color: white;
   padding: 3rem 1rem;
   text-align: center;
@@ -28,11 +28,11 @@
 
 /* Filters Section */
 .filters-section {
-  background: white;
+  background: #1e1e1e;
   padding: 2rem;
   border-radius: 10px;
   margin-bottom: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1.5rem;
@@ -47,38 +47,41 @@
 .filter-group label {
   font-weight: 600;
   margin-bottom: 0.5rem;
-  color: #333;
+  color: #ffffff;
 }
 
 .search-input,
 .genre-select {
   padding: 0.8rem;
-  border: 1px solid #ddd;
+  border: 1px solid #444;
   border-radius: 5px;
   font-size: 1rem;
   transition: border-color 0.3s, box-shadow 0.3s;
+  background-color: #2a2a2a;
+  color: #ffffff;
 }
 
 .search-input:focus,
 .genre-select:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #78ffd6;
+  box-shadow: 0 0 0 3px rgba(120, 255, 214, 0.1);
 }
 
 .reset-button {
   padding: 0.8rem 1.5rem;
-  background: #ff6b6b;
+  background: #b71c1c;
   color: white;
-  border: none;
+  border: 1px solid transparent;
   border-radius: 5px;
   cursor: pointer;
   font-weight: 600;
+  font-size: 1rem;
   transition: background 0.3s;
 }
 
 .reset-button:hover {
-  background: #ff5252;
+  background: #c62828;
 }
 
 /* Movies Grid */
@@ -93,16 +96,16 @@
 }
 
 .movie-card {
-  background: white;
+  background: #1e1e1e;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .movie-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
 
 .movie-image {
@@ -110,7 +113,7 @@
   width: 100%;
   height: 350px;
   overflow: hidden;
-  background: #e0e0e0;
+  background: #333;
 }
 
 .movie-image img {
@@ -144,8 +147,8 @@
 
 .book-button {
   padding: 0.8rem 2rem;
-  background: #ffd700;
-  color: #667eea;
+  background: #ffc107;
+  color: #121212;
   text-decoration: none;
   border-radius: 25px;
   font-weight: bold;
@@ -153,7 +156,7 @@
 }
 
 .book-button:hover {
-  background: #ffed4e;
+  background: #ffca28;
 }
 
 .movie-info {
@@ -163,7 +166,7 @@
 .movie-info h2 {
   font-size: 1.3rem;
   margin-bottom: 0.5rem;
-  color: #333;
+  color: #ffffff;
 }
 
 .year {
@@ -180,7 +183,7 @@
 }
 
 .genre {
-  background: #667eea;
+  background: #00796b;
   color: white;
   padding: 0.3rem 0.8rem;
   border-radius: 15px;
@@ -188,25 +191,25 @@
 }
 
 .rating {
-  color: #f59e0b;
+  color: #ffc107;
   font-weight: bold;
 }
 
 .duration {
-  color: #666;
+  color: #b3b3b3;
   font-size: 0.9rem;
   margin-bottom: 0.5rem;
 }
 
 .director {
-  color: #666;
+  color: #b3b3b3;
   font-size: 0.9rem;
   margin-bottom: 0.8rem;
   font-style: italic;
 }
 
 .synopsis {
-  color: #666;
+  color: #b3b3b3;
   font-size: 0.9rem;
   line-height: 1.5;
   margin-bottom: 1rem;
@@ -217,14 +220,14 @@
 }
 
 .details-link {
-  color: #667eea;
+  color: #78ffd6;
   text-decoration: none;
   font-weight: 600;
   transition: color 0.3s;
 }
 
 .details-link:hover {
-  color: #764ba2;
+  color: #a5ffeb;
 }
 
 /* Loading and Error */
@@ -232,22 +235,22 @@
 .error {
   text-align: center;
   padding: 3rem;
-  background: white;
+  background: #1e1e1e;
   border-radius: 10px;
   font-size: 1.1rem;
-  color: #666;
+  color: #b3b3b3;
 }
 
 .error {
-  background: #ffebee;
-  color: #c62828;
+  background: #2a2a2a;
+  color: #cf6679;
 }
 
 .retry-button {
   display: inline-block;
   margin-top: 1rem;
   padding: 0.8rem 1.5rem;
-  background: #667eea;
+  background: #00796b;
   color: white;
   border: none;
   border-radius: 5px;
@@ -257,15 +260,15 @@
 }
 
 .retry-button:hover {
-  background: #764ba2;
+  background: #009688;
 }
 
 .no-results {
   text-align: center;
   padding: 3rem;
-  background: white;
+  background: #1e1e1e;
   border-radius: 10px;
-  color: #666;
+  color: #b3b3b3;
 }
 
 /* Animations */
