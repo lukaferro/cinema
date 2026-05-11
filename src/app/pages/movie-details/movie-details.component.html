@@ -17,12 +17,10 @@
   <!-- Movie Details -->
   @if (movie && !loading) {
     <div class="movie-details">
-      <div class="movie-hero" [style.background-image]="'url(' + movie.poster_url + ')'">
-        <div class="hero-overlay"></div>
-        <button class="back-btn" (click)="goBack()">← Indietro</button>
-      </div>
 
       <div class="container">
+        <button class="back-link" (click)="goBack()">← Torna ai Film</button>
+
         <!-- Film Info Section -->
         <div class="movie-info-section">
           <div class="movie-poster">
