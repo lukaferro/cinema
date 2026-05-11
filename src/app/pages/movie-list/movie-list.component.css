@@ -287,6 +287,10 @@
     font-size: 2rem;
   }
 
+  .page-header {
+    padding: 2rem 1rem;
+  }
+
   .filters-section {
     grid-template-columns: 1fr;
   }

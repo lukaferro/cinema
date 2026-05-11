@@ -159,6 +159,21 @@
                   </div>
                 </div>
 
+                <div class="user-details-form">
+                  <div class="form-group">
+                    <label for="firstName">Nome</label>
+                    <input type="text" id="firstName" [(ngModel)]="firstName" class="form-input" [class.invalid]="formSubmitted && !firstName" placeholder="Il tuo nome">
+                  </div>
+                  <div class="form-group">
+                    <label for="lastName">Cognome</label>
+                    <input type="text" id="lastName" [(ngModel)]="lastName" class="form-input" [class.invalid]="formSubmitted && !lastName" placeholder="Il tuo cognome">
+                  </div>
+                  <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" [(ngModel)]="email" class="form-input" [class.invalid]="formSubmitted && !email" placeholder="latua@email.com">
+                  </div>
+                </div>
+
                 <div class="button-group">
                   <button
                     (click)="bookSeats()"

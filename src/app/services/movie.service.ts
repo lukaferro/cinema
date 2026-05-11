@@ -59,16 +59,22 @@ export class MovieService {
   /**
    * Prenota i posti
    */
-  bookSeats(bookingData: BookingRequest): Observable<any> {
+  bookSeats(screeningId: number, bookingData: BookingRequest): Observable<any> {
     return from(
-      fetch(`${this.API_BASE_URL}/bookings`, {
+      fetch(`${this.API_BASE_URL}/screenings/${screeningId}/bookings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(bookingData)
       })
-        .then(res => res.json())
+        .then(async res => {
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            throw data;
+          }
+          return data;
+        })
         .catch(err => {
           console.error('Fetch error:', err);
           throw err;

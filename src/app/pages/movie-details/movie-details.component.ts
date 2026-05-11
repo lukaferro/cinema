@@ -36,6 +36,12 @@ export class MovieDetailsComponent implements OnInit {
   bookingSummary: BookingSummary | null = null;
   showBookingSummary = false;
 
+  // Dati utente
+  firstName = '';
+  lastName = '';
+  email = '';
+  formSubmitted = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -184,54 +190,75 @@ export class MovieDetailsComponent implements OnInit {
 
   bookSeats(): void {
     if (this.selectedSeats.length === 0) {
-      alert('Per favore, seleziona almeno un posto');
       return;
     }
 
-    this.bookingLoading = true;
-    const bookingData = {
-      screening_id: this.selectedShowing!.id,
-      seats: this.selectedSeats
-    };
+    // Resetta lo stato per rimuovere la classe e permettere all'animazione di ripartire
+    this.formSubmitted = false;
 
-    const formattedTime = new Date(this.selectedShowing!.starts_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    setTimeout(() => {
+      this.formSubmitted = true;
 
-    this.movieService.bookSeats(bookingData).subscribe({
-      next: (response) => {
-        this.bookingSummary = {
-          confirmed: true,
-          movie: this.movie!.title,
-          date: this.selectedDate,
-          time: formattedTime,
-          seats: this.selectedSeats,
-          totalPrice: this.selectedSeats.length * 10,
-          confirmationCode: response.booking_id || 'BK' + Date.now()
-        };
-        this.showBookingSummary = true;
-        this.showSeatSelector = false;
-        this.bookingLoading = false;
-      },
-      error: (err) => {
-        console.error('Errore nella prenotazione:', err);
-        this.bookingSummary = {
-          confirmed: false,
-          movie: this.movie!.title,
-          date: this.selectedDate,
-          time: formattedTime,
-          seats: this.selectedSeats,
-          totalPrice: this.selectedSeats.length * 10,
-          error: 'Errore nella prenotazione. Riprova più tardi.'
-        };
-        this.showBookingSummary = true;
-        this.bookingLoading = false;
+      if (!this.firstName || !this.lastName || !this.email) {
+        return;
       }
-    });
+
+      this.bookingLoading = true;
+      const bookingData = {
+        first_name: this.firstName,
+        last_name: this.lastName,
+        email: this.email
+      };
+
+      const formattedTime = new Date(this.selectedShowing!.starts_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+
+      this.movieService.bookSeats(this.selectedShowing!.id, bookingData).subscribe({
+        next: (response) => {
+          this.bookingSummary = {
+            confirmed: true,
+            movie: this.movie!.title,
+            date: this.selectedDate,
+            time: formattedTime,
+            seats: this.selectedSeats,
+            totalPrice: this.selectedSeats.length * 10,
+            confirmationCode: response.id || 'BK' + Date.now()
+          };
+          this.showBookingSummary = true;
+          this.showSeatSelector = false;
+          this.bookingLoading = false;
+        },
+        error: (err) => {
+          console.error('Errore nella prenotazione:', err);
+          
+          let errorMessage = 'Errore nella prenotazione. Riprova più tardi.';
+          if (err && err.error) {
+            errorMessage = err.error;
+            if (err.details && err.details.email) {
+              errorMessage += ': ' + err.details.email;
+            }
+          }
+
+          this.bookingSummary = {
+            confirmed: false,
+            movie: this.movie!.title,
+            date: this.selectedDate,
+            time: formattedTime,
+            seats: this.selectedSeats,
+            totalPrice: this.selectedSeats.length * 10,
+            error: errorMessage
+          };
+          this.showBookingSummary = true;
+          this.bookingLoading = false;
+        }
+      });
+    }, 10); // 10ms sono sufficienti a far registrare al browser il cambiamento di stato
   }
 
   cancelSelection(): void {
     this.showSeatSelector = false;
     this.selectedShowing = null;
     this.selectedSeats = [];
+    this.formSubmitted = false;
   }
 
   goBack(): void {
@@ -242,5 +269,9 @@ export class MovieDetailsComponent implements OnInit {
     this.showBookingSummary = false;
     this.selectedSeats = [];
     this.selectedShowing = null;
+    this.firstName = '';
+    this.lastName = '';
+    this.email = '';
+    this.formSubmitted = false;
   }
 }

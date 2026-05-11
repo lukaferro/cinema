@@ -1,6 +1,7 @@
 export interface BookingRequest {
-  screening_id: number;
-  seats: string[];
+  first_name: string;
+  last_name: string;
+  email: string;
 }
 
 export interface BookingSummary {
