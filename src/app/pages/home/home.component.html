@@ -1,0 +1,77 @@
+<div class="home">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1>Benvenuto su CinemaHub</h1>
+      <p>Scopri e prenota i tuoi film preferiti</p>
+      <a routerLink="/movies" class="cta-button">Guarda i Film</a>
+    </div>
+  </section>
+
+  <!-- Film in Evidenza -->
+  <section class="featured-movies">
+    <div class="container">
+      <h2>Film in Evidenza</h2>
+
+      @if (loading) {
+        <div class="loading">
+          <p>Caricamento film...</p>
+        </div>
+      }
+
+      @if (error) {
+        <div class="error">
+          <p>{{ error }}</p>
+          <a routerLink="/movies" class="retry-button">Vai a Film</a>
+        </div>
+      }
+
+      @if (!loading && !error) {
+        <div class="movies-grid">
+          @for (movie of movies; track movie.id) {
+            <div class="movie-card">
+              <div class="movie-image">
+                <img [src]="movie.poster_url" [alt]="movie.title" />
+                <div class="movie-overlay">
+                  <a [routerLink]="['/movie', movie.id]" class="view-button">
+                    Dettagli
+                  </a>
+                </div>
+              </div>
+              <div class="movie-info">
+                <h3>{{ movie.title }}</h3>
+                <p class="rating">⭐ {{ movie.rating }}</p>
+                <p class="genre">{{ movie.genre }}</p>
+                <p class="duration">⏱️ {{ movie.duration }} min</p>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Sezione Informazioni -->
+  <section class="info-section" id="about">
+    <div class="container">
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="info-icon">🎬</div>
+          <h3>Ampia Selezione</h3>
+          <p>Scegli tra centinaia di film, dai blockbuster ai film indipendenti</p>
+        </div>
+        <div class="info-card">
+          <div class="info-icon">💺</div>
+          <h3>Prenota Facilmente</h3>
+          <p>Seleziona la data, l'orario e i posti comodamente online</p>
+        </div>
+        <div class="info-card">
+          <div class="info-icon">🎟️</div>
+          <h3>Prezzi Competitivi</h3>
+          <p>Goditi i tuoi film preferiti a prezzi vantaggiosi</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

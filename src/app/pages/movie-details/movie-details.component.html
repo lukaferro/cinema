@@ -1,0 +1,226 @@
+<div class="movie-details-container">
+  <!-- Loading State -->
+  @if (loading) {
+    <div class="loading">
+      <p>Caricamento dettagli film...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error && !loading) {
+    <div class="error">
+      <p>{{ error }}</p>
+      <a routerLink="/movies" class="back-button">Torna ai Film</a>
+    </div>
+  }
+
+  <!-- Movie Details -->
+  @if (movie && !loading) {
+    <div class="movie-details">
+      <div class="movie-hero" [style.background-image]="'url(' + movie.poster_url + ')'">
+        <div class="hero-overlay"></div>
+        <button class="back-btn" (click)="goBack()">← Indietro</button>
+      </div>
+
+      <div class="container">
+        <!-- Film Info Section -->
+        <div class="movie-info-section">
+          <div class="movie-poster">
+            <img [src]="movie.poster_url" [alt]="movie.title" />
+          </div>
+
+          <div class="movie-details-content">
+            <h1>{{ movie.title }}</h1>
+            
+            <div class="movie-meta">
+              <span class="badge">{{ movie.genre }}</span>
+              <span class="rating">⭐ {{ movie.rating }}</span>
+              <span class="year">{{ movie.year }}</span>
+            </div>
+
+            <p class="synopsis">{{ movie.description }}</p>
+
+            <div class="details-grid">
+              <div class="detail-item">
+                <label>Durata</label>
+                <p>{{ movie.duration }} minuti</p>
+              </div>
+              <div class="detail-item">
+                <label>Regista</label>
+                <p>{{ movie.director || 'N/A' }}</p>
+              </div>
+              <div class="detail-item">
+                <label>Genere</label>
+                <p>{{ movie.genre }}</p>
+              </div>
+              <div class="detail-item">
+                <label>Anno</label>
+                <p>{{ movie.year }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Booking Section -->
+      <div class="booking-section">
+        <h2>Prenota i Tuoi Posti</h2>
+
+        @if (!showBookingSummary) {
+          <div class="booking-form">
+            <!-- Date Selection -->
+            <div class="date-selection">
+              <label for="date">Seleziona Data:</label>
+              <input
+                type="date"
+                id="date"
+                [(ngModel)]="selectedDate"
+                [min]="getMinDate()"
+                [max]="getMaxDate()"
+                (change)="onDateChange()"
+                class="date-input"
+              />
+            </div>
+
+            <!-- Showings List -->
+            @if (showingsLoading) {
+              <div class="loading-showings">
+                <p>Caricamento orari...</p>
+              </div>
+            }
+
+            @if (!showingsLoading && showings.length > 0) {
+              <div class="showings-list">
+                <h3>Orari Disponibili</h3>
+                <div class="showings-grid">
+                  @for (showing of showings; track showing.id) {
+                    <div
+                      class="showing-card"
+                      [class.selected]="selectedShowing && selectedShowing.id === showing.id"
+                      [class.full]="showing.available_seats === 0"
+                      (click)="selectShowing(showing)"
+                    >
+                      <div class="time">{{ showing.time }}</div>
+                      <div class="seats">{{ showing.available_seats }} posti</div>
+                      <div class="price">€ 10.00</div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- Seat Selector -->
+            @if (showSeatSelector && selectedShowing) {
+              <div class="seat-selector">
+                <h3>Seleziona Posti per {{ selectedShowing.time }}</h3>
+                
+                <div class="screen">
+                  <div class="screen-label">SCHERMO</div>
+                </div>
+
+                <div class="seats-grid">
+                  @for (rowLetter of ['A', 'B', 'C', 'D', 'E', 'F']; track rowLetter) {
+                    <div class="seat-row">
+                      @for (s of getSeatsForRow(rowLetter); track s.id) {
+                        <div
+                          class="seat"
+                          [class.available]="s.available"
+                          [class.selected]="s.selected"
+                          [class.unavailable]="!s.available"
+                          (click)="toggleSeat(s)"
+                          [title]="s.id"
+                        >
+                          {{ s.id }}
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+
+                <div class="seat-legend">
+                  <div class="legend-item">
+                    <div class="legend-seat available"></div>
+                    <span>Disponibile</span>
+                  </div>
+                  <div class="legend-item">
+                    <div class="legend-seat selected"></div>
+                    <span>Selezionato</span>
+                  </div>
+                  <div class="legend-item">
+                    <div class="legend-seat unavailable"></div>
+                    <span>Occupato</span>
+                  </div>
+                </div>
+
+                <div class="booking-summary-small">
+                  <div>
+                    <strong>Posti Selezionati:</strong> {{ selectedSeats.length }}
+                  </div>
+                  <div>
+                    <strong>Prezzo Totale:</strong> € {{ (selectedSeats.length * 10).toFixed(2) }}
+                  </div>
+                </div>
+
+                <div class="button-group">
+                  <button
+                    (click)="bookSeats()"
+                    [disabled]="selectedSeats.length === 0 || bookingLoading"
+                    class="confirm-button"
+                  >
+                    @if (!bookingLoading) {
+                      <span>Conferma Prenotazione</span>
+                    } @else {
+                      <span>Elaborazione...</span>
+                    }
+                  </button>
+                  <button (click)="showSeatSelector = false" class="cancel-button">
+                    Annulla
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Booking Summary -->
+        @if (showBookingSummary && bookingSummary) {
+          <div class="booking-summary">
+            <div [class.success]="bookingSummary.confirmed" [class.error]="!bookingSummary.confirmed">
+              @if (bookingSummary.confirmed) {
+                <h3>✓ Prenotazione Confermata!</h3>
+              } @else {
+                <h3>✗ Errore nella Prenotazione</h3>
+              }
+
+              @if (bookingSummary.error) {
+                <div class="error-message">
+                  {{ bookingSummary.error }}
+                </div>
+              }
+
+              @if (bookingSummary.confirmed) {
+                <div class="confirmation-details">
+                  <p><strong>Codice Prenotazione:</strong> {{ bookingSummary.confirmationCode }}</p>
+                  <p><strong>Film:</strong> {{ bookingSummary.movie }}</p>
+                  <p><strong>Data:</strong> {{ bookingSummary.date }}</p>
+                  <p><strong>Ora:</strong> {{ bookingSummary.time }}</p>
+                  <p><strong>Posti:</strong> {{ bookingSummary.seats.join(', ') }}</p>
+                  <p><strong>Totale:</strong> € {{ bookingSummary.totalPrice.toFixed(2) }}</p>
+                </div>
+              }
+
+              <div class="button-group">
+                <button (click)="newBooking()" class="confirm-button">
+                  Nuova Prenotazione
+                </button>
+                <a routerLink="/movies" class="cancel-button">
+                  Torna ai Film
+                </a>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

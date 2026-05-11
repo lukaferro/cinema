@@ -1,0 +1,103 @@
+<div class="movie-list-container">
+  <div class="page-header">
+    <h1>Tutti i Film</h1>
+    <p>Scopri la nostra vasta collezione di film</p>
+  </div>
+
+  <div class="container">
+    <!-- Filters -->
+    <div class="filters-section">
+      <div class="filter-group">
+        <label for="search">Cerca per titolo o regista:</label>
+        <input
+          type="text"
+          id="search"
+          [(ngModel)]="searchQuery"
+          (input)="onSearchChange()"
+          placeholder="Inserisci titolo o regista..."
+          class="search-input"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label for="genre">Filtra per genere:</label>
+        <select
+          id="genre"
+          [(ngModel)]="selectedGenre"
+          (change)="onGenreChange()"
+          class="genre-select"
+        >
+          <option value="">Tutti i generi</option>
+          @for (genre of genres; track genre) {
+            <option [value]="genre">
+              {{ genre }}
+            </option>
+          }
+        </select>
+      </div>
+
+      <button (click)="resetFilters()" class="reset-button">
+        Ripristina Filtri
+      </button>
+    </div>
+
+    <!-- Loading State -->
+    @if (loading) {
+      <div class="loading">
+        <p>Caricamento film...</p>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (error) {
+      <div class="error">
+        <p>{{ error }}</p>
+        <button (click)="loadMovies()" class="retry-button">Riprova</button>
+      </div>
+    }
+
+    <!-- Movies Grid -->
+    @if (!loading && !error) {
+      <div class="movies-list">
+        @if (filteredMovies.length === 0) {
+          <div class="no-results">
+            <p>Nessun film trovato. Prova a modificare i tuoi filtri.</p>
+          </div>
+        }
+
+        <div class="movies-grid">
+          @for (movie of filteredMovies; track movie.id) {
+            <div class="movie-card">
+              <div class="movie-image">
+                <img [src]="movie.poster_url" [alt]="movie.title" />
+                <div class="movie-overlay">
+                  <a [routerLink]="['/movie', movie.id]" class="book-button">
+                    Prenota Ora
+                  </a>
+                </div>
+              </div>
+              <div class="movie-info">
+                <h2>{{ movie.title }}</h2>
+                <p class="year">{{ movie.year }}</p>
+                <div class="movie-details">
+                  <span class="genre">{{ movie.genre }}</span>
+                  <span class="rating">⭐ {{ movie.rating }}</span>
+                </div>
+                <p class="duration">⏱️ {{ movie.duration }} minuti</p>
+                @if (movie.director) {
+                  <p class="director">
+                    Regista: {{ movie.director }}
+                  </p>
+                }
+                <p class="synopsis">{{ movie.description }}</p>
+                <a [routerLink]="['/movie', movie.id]" class="details-link">
+                  Scopri di più →
+                </a>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>
