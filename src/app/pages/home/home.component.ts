@@ -21,7 +21,7 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     this.movieService.getMovies().subscribe({
       next: (data) => {
-        this.movies = data.slice(0, 6); // Mostra i primi 6 film
+        this.movies = data.slice(0, 8); // Mostra i primi 8 film
         this.loading = false;
       },
       error: (err) => {
