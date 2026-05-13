@@ -6,7 +6,7 @@ import { Film, Screening, BookingRequest } from '../models';
   providedIn: 'root'
 })
 export class MovieService {
-  private readonly API_BASE_URL = 'https://its-cinema.vercel.app/api';
+  private readonly API_BASE_URL = 'http://localhost:8080/api';
 
   constructor() {}
 
