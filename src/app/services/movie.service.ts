@@ -1,84 +1,43 @@
 import { Injectable } from '@angular/core';
-import { Observable, from } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Film, Screening, BookingRequest } from '../models';
+import { MOCK_FILMS } from '../data/mock-films';
+import { MOCK_SCREENINGS } from '../data/mock-screenings';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MovieService {
-  private readonly API_BASE_URL = 'http://localhost:8080/api';
 
   constructor() {}
 
-  /**
-   * Recupera tutti i film con filtro facoltativo per genere
-   */
   getMovies(genre?: string): Observable<Film[]> {
-    const url = genre 
-      ? `${this.API_BASE_URL}/films?genre=${genre}`
-      : `${this.API_BASE_URL}/films`;
-    
-    return from(
-      fetch(url)
-        .then(res => res.json())
-        .catch(err => {
-          console.error('Fetch error:', err);
-          throw err;
-        })
-    );
+    if (genre) {
+      const filtered = MOCK_FILMS.filter(f => f.genre.toLowerCase() === genre.toLowerCase());
+      return of(filtered);
+    }
+    return of(MOCK_FILMS);
   }
 
-  /**
-   * Recupera i dettagli di un film specifico
-   */
-  getMovieById(id: number): Observable<Film> {
-    return from(
-      fetch(`${this.API_BASE_URL}/films/${id}`)
-        .then(res => res.json())
-        .catch(err => {
-          console.error('Fetch error:', err);
-          throw err;
-        })
-    );
+  getMovieById(id: number): Observable<Film | undefined> {
+    const film = MOCK_FILMS.find(f => f.id === id);
+    return of(film);
   }
 
-  /**
-   * Recupera gli screening (orari) di un film
-   */
   getScreenings(filmId: number): Observable<Screening[]> {
-    return from(
-      fetch(`${this.API_BASE_URL}/films/${filmId}/screenings`)
-        .then(res => res.json())
-        .catch(err => {
-          console.error('Fetch error:', err);
-          throw err;
-        })
-    );
+    const screenings = MOCK_SCREENINGS.filter(s => s.film.id === filmId);
+    return of(screenings);
   }
 
-  /**
-   * Prenota i posti
-   */
   bookSeats(screeningId: number, bookingData: BookingRequest): Observable<any> {
-    return from(
-      fetch(`${this.API_BASE_URL}/screenings/${screeningId}/bookings`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(bookingData)
-      })
-        .then(async res => {
-          const data = await res.json().catch(() => ({}));
-          if (!res.ok) {
-            throw data;
-          }
-          return data;
-        })
-        .catch(err => {
-          console.error('Fetch error:', err);
-          throw err;
-        })
-    );
+    return of({
+      success: true,
+      message: 'Prenotazione confermata!',
+      bookingId: Math.floor(Math.random() * 10000),
+      screeningId,
+      firstName: bookingData.first_name,
+      lastName: bookingData.last_name,
+      email: bookingData.email
+    });
   }
 }
