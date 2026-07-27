@@ -29,7 +29,9 @@
 
       @if (!loading && !error) {
         <div class="carousel-wrapper">
-          <button class="carousel-btn carousel-btn-left" (click)="scrollLeft()">&#8249;</button>
+          <button class="carousel-btn carousel-btn-left" (click)="scrollLeft()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
 
           <div
             class="carousel-track"
@@ -60,7 +62,9 @@
             }
           </div>
 
-          <button class="carousel-btn carousel-btn-right" (click)="scrollRight()">&#8250;</button>
+          <button class="carousel-btn carousel-btn-right" (click)="scrollRight()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
         </div>
       }
     </div>

@@ -103,7 +103,23 @@ export class HomeComponent implements OnInit, OnDestroy {
       cancelAnimationFrame(this.rafId);
       this.rafId = null;
     }
-    this.startAutoScroll();
+    this.snapToNearest();
+  }
+
+  private snapToNearest(): void {
+    const el = this.carouselTrack.nativeElement;
+    const cards = el.children;
+    let closestCard = cards[0] as HTMLElement;
+    let minDist = Infinity;
+    for (let i = 0; i < cards.length; i++) {
+      const card = cards[i] as HTMLElement;
+      const dist = Math.abs(card.offsetLeft - el.scrollLeft);
+      if (dist < minDist) {
+        minDist = dist;
+        closestCard = card;
+      }
+    }
+    el.scrollTo({ left: closestCard.offsetLeft, behavior: 'smooth' });
   }
 
   onMouseEnter(): void {

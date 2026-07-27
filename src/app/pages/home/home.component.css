@@ -104,6 +104,7 @@
 
 .carousel-track.dragging {
   scroll-behavior: auto;
+  scroll-snap-type: none;
   cursor: grabbing;
 }
 
@@ -119,15 +120,18 @@
   border: 2px solid #555;
   background: #2a2a2a;
   color: #ffffff;
-  font-size: 1.5rem;
-  line-height: 1;
   cursor: pointer;
   transition: all 0.3s;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2;
-  margin-top: -2px;
+  padding: 0;
+}
+
+.carousel-btn svg {
+  width: 20px;
+  height: 20px;
 }
 
 .carousel-btn:hover {
