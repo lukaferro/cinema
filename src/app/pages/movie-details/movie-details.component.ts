@@ -57,15 +57,21 @@ export class MovieDetailsComponent implements OnInit {
     });
   }
 
+  private formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
   getMinDate(): string {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
+    return this.formatDate(new Date());
   }
 
   getMaxDate(): string {
     const maxDate = new Date();
     maxDate.setDate(maxDate.getDate() + 30);
-    return maxDate.toISOString().split('T')[0];
+    return this.formatDate(maxDate);
   }
 
   loadMovieDetails(): void {
