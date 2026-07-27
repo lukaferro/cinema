@@ -221,7 +221,7 @@ export class MovieDetailsComponent implements OnInit {
             time: formattedTime,
             seats: this.selectedSeats,
             totalPrice: this.selectedSeats.length * 10,
-            confirmationCode: response.id || 'BK' + Date.now()
+            confirmationCode: String(response.id) || 'BK' + Date.now()
           };
           this.showBookingSummary = true;
           this.showSeatSelector = false;
