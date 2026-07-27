@@ -18,6 +18,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   loading = true;
   error: string | null = null;
 
+  isDragging = false;
+  private startX = 0;
+  private scrollLeftStart = 0;
   private autoScrollInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor(private movieService: MovieService) {}
@@ -70,6 +73,27 @@ export class HomeComponent implements OnInit, OnDestroy {
       clearInterval(this.autoScrollInterval);
       this.autoScrollInterval = null;
     }
+  }
+
+  onDragStart(e: MouseEvent): void {
+    this.isDragging = true;
+    this.startX = e.pageX;
+    this.scrollLeftStart = this.carouselTrack.nativeElement.scrollLeft;
+    this.stopAutoScroll();
+  }
+
+  onDragMove(e: MouseEvent): void {
+    if (!this.isDragging) return;
+    e.preventDefault();
+    const el = this.carouselTrack.nativeElement;
+    const dx = e.pageX - this.startX;
+    el.scrollLeft = this.scrollLeftStart - dx;
+  }
+
+  onDragEnd(): void {
+    if (!this.isDragging) return;
+    this.isDragging = false;
+    this.startAutoScroll();
   }
 
   onMouseEnter(): void {

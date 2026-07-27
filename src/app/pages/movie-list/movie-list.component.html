@@ -83,13 +83,13 @@
                   <span class="genre">{{ movie.genre }}</span>
                   <span class="rating">⭐ {{ movie.rating }}</span>
                 </div>
-                <p class="duration">⏱️ {{ movie.duration }} minuti</p>
+                <p class="duration">⏱️ {{ movie.duration ? movie.duration + ' minuti' : 'Durata non disponibile' }}</p>
                 @if (movie.director) {
                   <p class="director">
                     Regista: {{ movie.director }}
                   </p>
                 }
-                <p class="synopsis">{{ movie.description }}</p>
+                <p class="synopsis">{{ movie.description || 'Sinopsis non disponibile' }}</p>
                 <a [routerLink]="['/movie', movie.id]" class="details-link">
                   Scopri di più →
                 </a>

@@ -34,8 +34,12 @@
           <div
             class="carousel-track"
             #carouselTrack
+            [class.dragging]="isDragging"
+            (mousedown)="onDragStart($event)"
+            (mousemove)="onDragMove($event)"
+            (mouseup)="onDragEnd()"
+            (mouseleave)="onDragEnd(); onMouseLeave()"
             (mouseenter)="onMouseEnter()"
-            (mouseleave)="onMouseLeave()"
           >
             @for (movie of movies; track movie.id) {
               <div class="movie-card">
