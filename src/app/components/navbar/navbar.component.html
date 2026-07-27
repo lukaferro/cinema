@@ -1,18 +1,25 @@
-<nav class="navbar">
+<nav class="navbar" role="navigation" aria-label="Navigazione principale">
   <div class="navbar-container">
     <div class="navbar-brand">
-      <a routerLink="/" class="logo">
-        🎬 CinemaHub
+      <a routerLink="/" class="logo" aria-label="CinemaHub - Home">
+        <span aria-hidden="true">&#127916;</span> CinemaHub
       </a>
     </div>
 
-    <button class="menu-toggle" (click)="toggleMenu()" [class.active]="isMenuOpen">
+    <button
+      class="menu-toggle"
+      (click)="toggleMenu()"
+      [class.active]="isMenuOpen"
+      [attr.aria-expanded]="isMenuOpen"
+      aria-controls="nav-menu"
+      aria-label="Apri menu di navigazione"
+    >
       <span></span>
       <span></span>
       <span></span>
     </button>
 
-    <ul class="nav-menu" [class.active]="isMenuOpen">
+    <ul class="nav-menu" [class.active]="isMenuOpen" id="nav-menu" [attr.aria-hidden]="!isMenuOpen">
       <li class="nav-item">
         <a
           routerLink="/"

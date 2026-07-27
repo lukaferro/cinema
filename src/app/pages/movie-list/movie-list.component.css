@@ -26,7 +26,6 @@
   padding: 2rem 1rem;
 }
 
-/* Filters Section */
 .filters-section {
   background: #1e1e1e;
   padding: 2rem;
@@ -63,7 +62,6 @@
 
 .search-input:focus,
 .genre-select:focus {
-  outline: none;
   border-color: #78ffd6;
   box-shadow: 0 0 0 3px rgba(120, 255, 214, 0.1);
 }
@@ -84,7 +82,6 @@
   background: #c62828;
 }
 
-/* Movies Grid */
 .movies-list {
   animation: fadeIn 0.5s ease-in;
 }
@@ -230,7 +227,6 @@
   color: #a5ffeb;
 }
 
-/* Loading and Error */
 .loading,
 .error {
   text-align: center;
@@ -271,7 +267,6 @@
   color: #b3b3b3;
 }
 
-/* Pagination */
 .pagination {
   display: flex;
   justify-content: center;
@@ -319,25 +314,23 @@
   padding: 0 0.3rem;
 }
 
-/* Animations */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .movies-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
   }
 }
 
-/* Responsive */
+/* Mobile */
 @media (max-width: 768px) {
-  .page-header h1 {
-    font-size: 2rem;
-  }
-
-  .page-header {
-    padding: 2rem 1rem;
-  }
+  .page-header h1 { font-size: 2rem; }
+  .page-header { padding: 2rem 1rem; }
 
   .filters-section {
     grid-template-columns: 1fr;
@@ -348,13 +341,20 @@
     gap: 1rem;
   }
 
-  .pagination {
-    gap: 0.3rem;
+  .pagination { gap: 0.3rem; }
+  .page-btn { min-width: 36px; height: 36px; font-size: 0.9rem; }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .movies-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
 
-  .page-btn {
-    min-width: 36px;
-    height: 36px;
-    font-size: 0.9rem;
-  }
+  .page-header h1 { font-size: 1.5rem; }
+  .page-header p { font-size: 1rem; }
+
+  .pagination { gap: 0.2rem; }
+  .page-btn { min-width: 32px; height: 32px; font-size: 0.8rem; }
 }

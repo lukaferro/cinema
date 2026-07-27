@@ -115,3 +115,13 @@
     border: none;
   }
 }
+
+@media (max-width: 480px) {
+  .logo {
+    font-size: 1.2rem;
+  }
+
+  .nav-menu {
+    padding: 1rem;
+  }
+}

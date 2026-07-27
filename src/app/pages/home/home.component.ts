@@ -1,5 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, ChangeDetectionStrategy, NgZone } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MovieService } from '../../services/movie.service';
 import { Film } from '../../models';
@@ -7,9 +6,10 @@ import { Film } from '../../models';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [RouterLink],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.css'
+  styleUrl: './home.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomeComponent implements OnInit, OnDestroy {
   @ViewChild('carouselTrack') carouselTrack!: ElementRef<HTMLDivElement>;
@@ -25,7 +25,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   private rafId: number | null = null;
   private autoScrollInterval: ReturnType<typeof setInterval> | null = null;
 
-  constructor(private movieService: MovieService) {}
+  constructor(private movieService: MovieService, private ngZone: NgZone) {}
 
   ngOnInit(): void {
     this.movieService.getPopularMovies().subscribe({
@@ -59,15 +59,17 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private startAutoScroll(): void {
-    this.autoScrollInterval = setInterval(() => {
-      const el = this.carouselTrack?.nativeElement;
-      if (!el) return;
-      if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 10) {
-        el.scrollTo({ left: 0, behavior: 'smooth' });
-      } else {
-        el.scrollBy({ left: 320, behavior: 'smooth' });
-      }
-    }, 5000);
+    this.ngZone.runOutsideAngular(() => {
+      this.autoScrollInterval = setInterval(() => {
+        const el = this.carouselTrack?.nativeElement;
+        if (!el) return;
+        if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 10) {
+          el.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          el.scrollBy({ left: 320, behavior: 'smooth' });
+        }
+      }, 5000);
+    });
   }
 
   private stopAutoScroll(): void {

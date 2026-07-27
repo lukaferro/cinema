@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectionStrategy, Inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
@@ -8,10 +8,11 @@ import { Film, TmdbGenre } from '../../models';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule],
   selector: 'app-movie-list',
   templateUrl: './movie-list.component.html',
-  styleUrl: './movie-list.component.css'
+  styleUrl: './movie-list.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MovieListComponent implements OnInit {
   movies: Film[] = [];
@@ -26,9 +27,14 @@ export class MovieListComponent implements OnInit {
   totalPages = 1;
   maxVisiblePages = 7;
 
+  cachedPageNumbers: (number | string)[] = [];
+
   private searchSubject = new Subject<string>();
 
-  constructor(private movieService: MovieService) {}
+  constructor(
+    private movieService: MovieService,
+    @Inject(DOCUMENT) private document: Document
+  ) {}
 
   ngOnInit(): void {
     this.loadGenres();
@@ -51,6 +57,7 @@ export class MovieListComponent implements OnInit {
         this.movies = res.movies;
         this.totalPages = res.totalPages;
         this.loading = false;
+        this.updateCachedPageNumbers();
       },
       error: (err) => {
         console.error('Errore nella ricerca:', err);
@@ -75,6 +82,7 @@ export class MovieListComponent implements OnInit {
         this.movies = res.movies;
         this.totalPages = res.totalPages;
         this.loading = false;
+        this.updateCachedPageNumbers();
       },
       error: (err) => {
         console.error('Errore nel caricamento dei film:', err);
@@ -101,6 +109,7 @@ export class MovieListComponent implements OnInit {
         this.movies = res.movies;
         this.totalPages = res.totalPages;
         this.loading = false;
+        this.updateCachedPageNumbers();
       },
       error: (err) => {
         console.error('Errore nel filtro genere:', err);
@@ -114,7 +123,7 @@ export class MovieListComponent implements OnInit {
     if (page < 1 || page > this.totalPages || page === this.currentPage) return;
     this.currentPage = page;
     this.loading = true;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.document.defaultView?.scrollTo({ top: 0, behavior: 'smooth' });
 
     if (this.searchQuery.trim()) {
       this.movieService.searchMovies(this.searchQuery, page).subscribe({
@@ -122,6 +131,7 @@ export class MovieListComponent implements OnInit {
           this.movies = res.movies;
           this.totalPages = res.totalPages;
           this.loading = false;
+          this.updateCachedPageNumbers();
         },
         error: () => { this.loading = false; }
       });
@@ -131,6 +141,7 @@ export class MovieListComponent implements OnInit {
           this.movies = res.movies;
           this.totalPages = res.totalPages;
           this.loading = false;
+          this.updateCachedPageNumbers();
         },
         error: () => { this.loading = false; }
       });
@@ -140,6 +151,7 @@ export class MovieListComponent implements OnInit {
           this.movies = res.movies;
           this.totalPages = res.totalPages;
           this.loading = false;
+          this.updateCachedPageNumbers();
         },
         error: () => { this.loading = false; }
       });
@@ -147,6 +159,10 @@ export class MovieListComponent implements OnInit {
   }
 
   getPageNumbers(): (number | string)[] {
+    return this.cachedPageNumbers;
+  }
+
+  private updateCachedPageNumbers(): void {
     const pages: (number | string)[] = [];
     const half = Math.floor(this.maxVisiblePages / 2);
     let start = Math.max(1, this.currentPage - half);
@@ -170,7 +186,7 @@ export class MovieListComponent implements OnInit {
       pages.push(this.totalPages);
     }
 
-    return pages;
+    this.cachedPageNumbers = pages;
   }
 
   resetFilters(): void {

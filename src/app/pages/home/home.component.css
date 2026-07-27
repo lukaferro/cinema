@@ -4,7 +4,9 @@
 
 /* Hero Section */
 .hero {
-  height: 500px;
+  min-height: 500px;
+  height: 50vh;
+  max-height: 600px;
   background: linear-gradient(135deg, #004d40 0%, #00796b 100%);
   position: relative;
   display: flex;
@@ -326,4 +328,17 @@
   .movie-image {
     height: 240px;
   }
+}
+
+@media (max-width: 480px) {
+  .hero-content h1 { font-size: 1.5rem; }
+  .hero-content p { font-size: 1rem; }
+  .hero { min-height: 300px; height: 40vh; }
+  .cta-button { padding: 0.8rem 1.8rem; font-size: 1rem; }
+  .featured-movies h2 { font-size: 1.5rem; }
+  .carousel-btn { width: 32px; height: 32px; }
+  .carousel-btn svg { width: 16px; height: 16px; }
+  .movie-card { flex: 0 0 140px; }
+  .movie-image { height: 210px; }
+  .info-grid { grid-template-columns: 1fr; }
 }

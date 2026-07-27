@@ -1,7 +1,7 @@
 <div class="home">
   <!-- Hero Section -->
-  <section class="hero">
-    <div class="hero-overlay"></div>
+  <section class="hero" aria-label="Benvenuto su CinemaHub">
+    <div class="hero-overlay" aria-hidden="true"></div>
     <div class="hero-content">
       <h1>Benvenuto su CinemaHub</h1>
       <p>Scopri e prenota i tuoi film preferiti</p>
@@ -10,18 +10,18 @@
   </section>
 
   <!-- Film in Evidenza - Carousel -->
-  <section class="featured-movies">
+  <section class="featured-movies" aria-label="Film in evidenza">
     <div class="container">
       <h2>Film in Evidenza</h2>
 
       @if (loading) {
-        <div class="loading">
+        <div class="loading" role="status">
           <p>Caricamento film...</p>
         </div>
       }
 
       @if (error) {
-        <div class="error">
+        <div class="error" role="alert">
           <p>{{ error }}</p>
           <a routerLink="/movies" class="retry-button">Vai a Film</a>
         </div>
@@ -29,8 +29,8 @@
 
       @if (!loading && !error) {
         <div class="carousel-wrapper">
-          <button class="carousel-btn carousel-btn-left" (click)="scrollLeft()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          <button class="carousel-btn carousel-btn-left" (click)="scrollLeft()" aria-label="Scorri a sinistra">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
 
           <div
@@ -42,28 +42,30 @@
             (mouseup)="onDragEnd()"
             (mouseleave)="onDragEnd(); onMouseLeave()"
             (mouseenter)="onMouseEnter()"
+            role="region"
+            aria-label="Carosello film in evidenza"
           >
             @for (movie of movies; track movie.id) {
               <div class="movie-card">
                 <div class="movie-image">
-                  <img [src]="movie.poster_url" [alt]="movie.title" />
+                  <img [src]="movie.poster_url" [alt]="movie.title" loading="lazy" width="200" height="300" />
                   <div class="movie-overlay">
-                    <a [routerLink]="['/movie', movie.id]" class="view-button">
+                    <a [routerLink]="['/movie', movie.id]" class="view-button" [attr.aria-label]="'Dettagli di ' + movie.title">
                       Dettagli
                     </a>
                   </div>
                 </div>
                 <div class="movie-info">
                   <h3>{{ movie.title }}</h3>
-                  <p class="rating">⭐ {{ movie.rating }}</p>
+                  <p class="rating"><span aria-hidden="true">&#11088;</span> <span class="sr-only">Valutazione:</span> {{ movie.rating }}</p>
                   <p class="genre">{{ movie.genre }}</p>
                 </div>
               </div>
             }
           </div>
 
-          <button class="carousel-btn carousel-btn-right" (click)="scrollRight()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          <button class="carousel-btn carousel-btn-right" (click)="scrollRight()" aria-label="Scorri a destra">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         </div>
       }
@@ -71,21 +73,21 @@
   </section>
 
   <!-- Sezione Informazioni -->
-  <section class="info-section" id="about">
+  <section class="info-section" id="about" aria-label="Perché scegliere CinemaHub">
     <div class="container">
       <div class="info-grid">
         <div class="info-card">
-          <div class="info-icon">🎬</div>
+          <div class="info-icon" aria-hidden="true">&#127916;</div>
           <h3>Ampia Selezione</h3>
           <p>Scegli tra centinaia di film, dai blockbuster ai film indipendenti</p>
         </div>
         <div class="info-card">
-          <div class="info-icon">💺</div>
+          <div class="info-icon" aria-hidden="true">&#128186;</div>
           <h3>Prenota Facilmente</h3>
           <p>Seleziona la data, l'orario e i posti comodamente online</p>
         </div>
         <div class="info-card">
-          <div class="info-icon">🎟️</div>
+          <div class="info-icon" aria-hidden="true">&#127903;</div>
           <h3>Prezzi Competitivi</h3>
           <p>Goditi i tuoi film preferiti a prezzi vantaggiosi</p>
         </div>

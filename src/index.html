@@ -1,12 +1,54 @@
 <!doctype html>
-<html lang="en">
+<html lang="it">
 <head>
   <meta charset="utf-8">
-  <title>CinemaHub</title>
+  <title>CinemaHub - Scopri e Prenota i Tuoi Film Preferiti</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CinemaHub - Prenota online i tuoi film preferiti. Scopri la programmazione, scegli data, orario e posti comodamente da casa.">
+  <meta name="theme-color" content="#004d40">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="CinemaHub - Scopri e Prenota i Tuoi Film Preferiti">
+  <meta property="og:description" content="Prenota online i tuoi film preferiti. Scopri la programmazione, scegli data, orario e posti comodamente da casa.">
+  <meta property="og:site_name" content="CinemaHub">
+  <meta property="og:image" content="favicon.svg">
+
+  <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "MovieTheater",
+    "name": "CinemaHub",
+    "description": "Prenota online i tuoi film preferiti",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Via Roma 123",
+      "addressLocality": "Milano",
+      "postalCode": "20121",
+      "addressCountry": "IT"
+    },
+    "telephone": "+391234567890",
+    "openingHoursSpecification": [
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"],
+        "opens": "12:00",
+        "closes": "23:00"
+      },
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Saturday","Sunday"],
+        "opens": "11:00",
+        "closes": "00:00"
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
   <app-root></app-root>

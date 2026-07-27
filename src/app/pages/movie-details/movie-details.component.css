@@ -126,7 +126,7 @@
   border-top: 1px solid #333;
 }
 
-.detail-item label {
+.detail-item .detail-label {
   font-weight: bold;
   color: #78ffd6;
   display: block;
@@ -177,7 +177,6 @@
 }
 
 .date-input:focus {
-  outline: none;
   border-color: #78ffd6;
   box-shadow: 0 0 0 3px rgba(120, 255, 214, 0.1);
 }
@@ -405,7 +404,6 @@
 }
 
 .form-input:focus {
-  outline: none;
   border-color: #78ffd6;
   box-shadow: 0 0 0 3px rgba(120, 255, 214, 0.1);
 }
@@ -579,5 +577,26 @@
   .cancel-button {
     min-width: auto;
     width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .movie-details-content h1 {
+    font-size: 1.4rem;
+  }
+
+  .booking-section h2 {
+    font-size: 1.4rem;
+  }
+
+  .seat {
+    width: 26px;
+    height: 26px;
+    font-size: 0.65rem;
+  }
+
+  .seat:nth-child(5),
+  .seat:nth-child(15) {
+    margin-right: 0.8rem;
   }
 }

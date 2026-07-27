@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectionStrategy, ElementRef, ViewChild } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MovieService } from '../../services/movie.service';
@@ -7,24 +7,25 @@ import { Film, Screening, Seat, BookingSummary } from '../../models';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, DatePipe],
   selector: 'app-movie-details',
   templateUrl: './movie-details.component.html',
-  styleUrl: './movie-details.component.css'
+  styleUrl: './movie-details.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MovieDetailsComponent implements OnInit {
+  @ViewChild('seatSelectorRef') seatSelectorRef!: ElementRef;
+
   movie: Film | null = null;
   movieId!: number;
   loading = true;
   error: string | null = null;
 
-  // Selezione data e orario
   selectedDate: string = this.getMinDate();
   showings: Screening[] = [];
   showingsLoading = false;
   selectedShowing: Screening | null = null;
 
-  // Selezione posti
   seats: Seat[] = [];
   selectedSeats: string[] = [];
   seatRows: string[] = [];
@@ -32,11 +33,11 @@ export class MovieDetailsComponent implements OnInit {
   showSeatSelector = false;
   bookingLoading = false;
 
-  // Dettagli prenotazione
+  seatsByRow: Map<string, Seat[]> = new Map();
+
   bookingSummary: BookingSummary | null = null;
   showBookingSummary = false;
 
-  // Dati utente
   firstName = '';
   lastName = '';
   email = '';
@@ -67,12 +68,10 @@ export class MovieDetailsComponent implements OnInit {
   }
 
   loadMovieDetails(): void {
-    // Carica i dettagli del film da API
     this.movieService.getMovieById(this.movieId).subscribe({
       next: (movie) => {
         this.movie = movie;
         this.loading = false;
-        // Carica gli screening una volta che il film è caricato
         this.loadShowings();
       },
       error: (err) => {
@@ -93,18 +92,14 @@ export class MovieDetailsComponent implements OnInit {
     this.showingsLoading = true;
     this.movieService.getScreenings(this.movieId).subscribe({
       next: (data) => {
-        // Filtriamo gli orari in base alla data selezionata
         this.showings = data.filter(showing => {
           const date = new Date(showing.starts_at);
-          const localDateString = date.getFullYear() + '-' + 
-            String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+          const localDateString = date.getFullYear() + '-' +
+            String(date.getMonth() + 1).padStart(2, '0') + '-' +
             String(date.getDate()).padStart(2, '0');
           return localDateString === this.selectedDate;
         });
-
-        // Ordiniamo gli orari cronologicamente
         this.showings.sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime());
-
         this.showingsLoading = false;
       },
       error: (err) => {
@@ -121,27 +116,21 @@ export class MovieDetailsComponent implements OnInit {
     this.generateSeats(showing);
     this.showSeatSelector = true;
 
-    // Scroll automatico fluido verso la selezione dei posti
     setTimeout(() => {
-      const seatSelector = document.querySelector('.seat-selector');
-      if (seatSelector) {
-        seatSelector.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+      this.seatSelectorRef?.nativeElement?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
   }
 
   generateSeats(showing: Screening): void {
-    // Posti fissi a 260 per supportare sale più grandi (es. 250 posti)
     const capacity = 260;
     const available = Math.min(showing.available_seats, capacity);
     const occupied = capacity - available;
 
     this.seatsPerRow = 20;
-    const numRows = 13; // 20 posti * 13 file = 260 posti fissi
+    const numRows = 13;
 
     this.seatRows = Array.from({ length: numRows }, (_, i) => String.fromCharCode(65 + i));
 
-    // Genera un array per la disponibilità distribuendo casualmente i posti occupati
     const seatAvailability = Array(capacity).fill(true);
     let occupiedCount = 0;
     while (occupiedCount < occupied) {
@@ -153,31 +142,36 @@ export class MovieDetailsComponent implements OnInit {
     }
 
     this.seats = [];
+    this.seatsByRow = new Map();
     let seatCount = 0;
 
     for (const row of this.seatRows) {
+      const rowSeats: Seat[] = [];
       for (let i = 1; i <= this.seatsPerRow; i++) {
-        this.seats.push({
+        const seat: Seat = {
           id: `${row}${i}`,
           row: row,
           number: i,
           available: seatAvailability[seatCount],
           selected: false
-        });
+        };
+        this.seats.push(seat);
+        rowSeats.push(seat);
         seatCount++;
       }
+      this.seatsByRow.set(row, rowSeats);
     }
   }
 
   getSeatsForRow(rowLetter: string): Seat[] {
-    return this.seats.filter(s => s.row === rowLetter);
+    return this.seatsByRow.get(rowLetter) ?? [];
   }
 
   toggleSeat(seat: Seat): void {
     if (!seat.available) return;
-    
+
     seat.selected = !seat.selected;
-    
+
     if (seat.selected) {
       this.selectedSeats.push(seat.id);
     } else {
@@ -188,20 +182,29 @@ export class MovieDetailsComponent implements OnInit {
     }
   }
 
-  bookSeats(): void {
-    if (this.selectedSeats.length === 0) {
-      return;
+  onSeatKeydown(event: KeyboardEvent, seat: Seat): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.toggleSeat(seat);
     }
+  }
 
-    // Resetta lo stato per rimuovere la classe e permettere all'animazione di ripartire
+  onShowingKeydown(event: KeyboardEvent, showing: Screening): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.selectShowing(showing);
+    }
+  }
+
+  bookSeats(): void {
+    if (this.selectedSeats.length === 0) return;
+
     this.formSubmitted = false;
 
     setTimeout(() => {
       this.formSubmitted = true;
 
-      if (!this.firstName || !this.lastName || !this.email) {
-        return;
-      }
+      if (!this.firstName || !this.lastName || !this.email) return;
 
       this.bookingLoading = true;
       const bookingData = {
@@ -229,7 +232,6 @@ export class MovieDetailsComponent implements OnInit {
         },
         error: (err) => {
           console.error('Errore nella prenotazione:', err);
-          
           let errorMessage = 'Errore nella prenotazione. Riprova più tardi.';
           if (err && err.error) {
             errorMessage = err.error;
@@ -237,7 +239,6 @@ export class MovieDetailsComponent implements OnInit {
               errorMessage += ': ' + err.details.email;
             }
           }
-
           this.bookingSummary = {
             confirmed: false,
             movie: this.movie!.title,
@@ -251,7 +252,7 @@ export class MovieDetailsComponent implements OnInit {
           this.bookingLoading = false;
         }
       });
-    }, 10); // 10ms sono sufficienti a far registrare al browser il cambiamento di stato
+    }, 10);
   }
 
   cancelSelection(): void {

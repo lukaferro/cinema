@@ -6,10 +6,10 @@ import { AboutComponent } from './pages/about/about.component';
 import { ContactComponent } from './pages/contact/contact.component';
 
 export const routes: Routes = [
-  { path: '', component: HomeComponent },
-  { path: 'movies', component: MovieListComponent },
-  { path: 'movie/:id', component: MovieDetailsComponent },
-  { path: 'about', component: AboutComponent },
-  { path: 'contact', component: ContactComponent },
+  { path: '', component: HomeComponent, title: 'CinemaHub - Scopri e Prenota i Tuoi Film Preferiti' },
+  { path: 'movies', component: MovieListComponent, title: 'Film - CinemaHub' },
+  { path: 'movie/:id', component: MovieDetailsComponent, title: 'Dettagli Film - CinemaHub' },
+  { path: 'about', component: AboutComponent, title: 'Chi Siamo - CinemaHub' },
+  { path: 'contact', component: ContactComponent, title: 'Contattaci - CinemaHub' },
   { path: '**', redirectTo: '' }
 ];

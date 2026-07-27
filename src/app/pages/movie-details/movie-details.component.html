@@ -1,38 +1,33 @@
 <div class="movie-details-container">
-  <!-- Loading State -->
   @if (loading) {
-    <div class="loading">
+    <div class="loading" role="status">
       <p>Caricamento dettagli film...</p>
     </div>
   }
 
-  <!-- Error State -->
   @if (error && !loading) {
-    <div class="error">
+    <div class="error" role="alert">
       <p>{{ error }}</p>
       <a routerLink="/movies" class="back-button">Torna ai Film</a>
     </div>
   }
 
-  <!-- Movie Details -->
   @if (movie && !loading) {
     <div class="movie-details">
-
       <div class="container">
-        <button class="back-link" (click)="goBack()">← Torna ai Film</button>
+        <button class="back-link" (click)="goBack()" aria-label="Torna alla lista film">&larr; Torna ai Film</button>
 
-        <!-- Film Info Section -->
         <div class="movie-info-section">
           <div class="movie-poster">
-            <img [src]="movie.poster_url" [alt]="movie.title" />
+            <img [src]="movie.poster_url" [alt]="movie.title" loading="eager" width="250" height="375" />
           </div>
 
           <div class="movie-details-content">
             <h1>{{ movie.title }}</h1>
-            
+
             <div class="movie-meta">
               <span class="badge">{{ movie.genre }}</span>
-              <span class="rating">⭐ {{ movie.rating }}</span>
+              <span class="rating"><span aria-hidden="true">&#11088;</span> <span class="sr-only">Valutazione:</span> {{ movie.rating }}</span>
               <span class="year">{{ movie.year }}</span>
             </div>
 
@@ -40,19 +35,19 @@
 
             <div class="details-grid">
               <div class="detail-item">
-                <label>Durata</label>
+                <span class="detail-label">Durata</span>
                 <p>{{ movie.duration }} minuti</p>
               </div>
               <div class="detail-item">
-                <label>Regista</label>
+                <span class="detail-label">Regista</span>
                 <p>{{ movie.director || 'N/A' }}</p>
               </div>
               <div class="detail-item">
-                <label>Genere</label>
+                <span class="detail-label">Genere</span>
                 <p>{{ movie.genre }}</p>
               </div>
               <div class="detail-item">
-                <label>Anno</label>
+                <span class="detail-label">Anno</span>
                 <p>{{ movie.year }}</p>
               </div>
             </div>
@@ -60,13 +55,11 @@
         </div>
       </div>
 
-      <!-- Booking Section -->
       <div class="booking-section">
         <h2>Prenota i Tuoi Posti</h2>
 
         @if (!showBookingSummary) {
           <div class="booking-form">
-            <!-- Date Selection -->
             <div class="date-selection">
               <label for="date">Seleziona Data:</label>
               <input
@@ -80,9 +73,8 @@
               />
             </div>
 
-            <!-- Showings List -->
             @if (showingsLoading) {
-              <div class="loading-showings">
+              <div class="loading-showings" role="status">
                 <p>Caricamento orari...</p>
               </div>
             }
@@ -97,28 +89,32 @@
                       [class.selected]="selectedShowing && selectedShowing.id === showing.id"
                       [class.full]="showing.available_seats === 0"
                       (click)="selectShowing(showing)"
+                      (keydown)="onShowingKeydown($event, showing)"
+                      [attr.aria-label]="(showing.starts_at | date:'HH:mm') + ', ' + showing.available_seats + ' posti disponibili, € 10'"
+                      [attr.tabindex]="0"
+                      role="button"
+                      [attr.aria-pressed]="selectedShowing && selectedShowing.id === showing.id"
                     >
                       <div class="time">{{ showing.starts_at | date:'HH:mm' }}</div>
                       <div class="seats">{{ showing.available_seats }} posti</div>
-                      <div class="price">€ 10.00</div>
+                      <div class="price">&euro; 10.00</div>
                     </div>
                   }
                 </div>
               </div>
             }
 
-            <!-- Seat Selector -->
             @if (showSeatSelector && selectedShowing) {
-              <div class="seat-selector">
+              <div class="seat-selector" #seatSelectorRef>
                 <h3>Seleziona Posti per {{ selectedShowing.starts_at | date:'HH:mm' }}</h3>
-                
-                <div class="screen">
+
+                <div class="screen" aria-hidden="true">
                   <div class="screen-label">SCHERMO</div>
                 </div>
 
-                <div class="seats-grid">
+                <div class="seats-grid" role="group" aria-label="Griglia posti">
                   @for (rowLetter of seatRows; track rowLetter) {
-                    <div class="seat-row">
+                    <div class="seat-row" [attr.aria-label]="'Fila ' + rowLetter">
                       @for (s of getSeatsForRow(rowLetter); track s.id) {
                         <div
                           class="seat"
@@ -126,7 +122,12 @@
                           [class.selected]="s.selected"
                           [class.unavailable]="!s.available"
                           (click)="toggleSeat(s)"
-                          [title]="s.id"
+                          (keydown)="onSeatKeydown($event, s)"
+                          [attr.aria-label]="s.id + (s.available ? (s.selected ? ', selezionato' : ', disponibile') : ', occupato')"
+                          [attr.tabindex]="0"
+                          role="checkbox"
+                          [attr.aria-checked]="s.selected"
+                          [attr.aria-disabled]="!s.available"
                         >
                           {{ s.id }}
                         </div>
@@ -135,17 +136,17 @@
                   }
                 </div>
 
-                <div class="seat-legend">
+                <div class="seat-legend" aria-label="Legenda posti">
                   <div class="legend-item">
-                    <div class="legend-seat available"></div>
+                    <div class="legend-seat available" aria-hidden="true"></div>
                     <span>Disponibile</span>
                   </div>
                   <div class="legend-item">
-                    <div class="legend-seat selected"></div>
+                    <div class="legend-seat selected" aria-hidden="true"></div>
                     <span>Selezionato</span>
                   </div>
                   <div class="legend-item">
-                    <div class="legend-seat unavailable"></div>
+                    <div class="legend-seat unavailable" aria-hidden="true"></div>
                     <span>Occupato</span>
                   </div>
                 </div>
@@ -155,22 +156,22 @@
                     <strong>Posti Selezionati:</strong> {{ selectedSeats.length }}
                   </div>
                   <div>
-                    <strong>Prezzo Totale:</strong> € {{ (selectedSeats.length * 10).toFixed(2) }}
+                    <strong>Prezzo Totale:</strong> &euro; {{ (selectedSeats.length * 10).toFixed(2) }}
                   </div>
                 </div>
 
                 <div class="user-details-form">
                   <div class="form-group">
                     <label for="firstName">Nome</label>
-                    <input type="text" id="firstName" [(ngModel)]="firstName" class="form-input" [class.invalid]="formSubmitted && !firstName" placeholder="Il tuo nome">
+                    <input type="text" id="firstName" [(ngModel)]="firstName" class="form-input" [class.invalid]="formSubmitted && !firstName" placeholder="Il tuo nome" required>
                   </div>
                   <div class="form-group">
                     <label for="lastName">Cognome</label>
-                    <input type="text" id="lastName" [(ngModel)]="lastName" class="form-input" [class.invalid]="formSubmitted && !lastName" placeholder="Il tuo cognome">
+                    <input type="text" id="lastName" [(ngModel)]="lastName" class="form-input" [class.invalid]="formSubmitted && !lastName" placeholder="Il tuo cognome" required>
                   </div>
                   <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" id="email" [(ngModel)]="email" class="form-input" [class.invalid]="formSubmitted && !email" placeholder="latua@email.com">
+                    <input type="email" id="email" [(ngModel)]="email" class="form-input" [class.invalid]="formSubmitted && !email" placeholder="latua@email.com" required>
                   </div>
                 </div>
 
@@ -195,20 +196,17 @@
           </div>
         }
 
-        <!-- Booking Summary -->
         @if (showBookingSummary && bookingSummary) {
           <div class="booking-summary">
-            <div [class.success]="bookingSummary.confirmed" [class.error]="!bookingSummary.confirmed">
+            <div [class.success]="bookingSummary.confirmed" [class.error]="!bookingSummary.confirmed" role="status">
               @if (bookingSummary.confirmed) {
-                <h3>✓ Prenotazione Confermata!</h3>
+                <h3>&check; Prenotazione Confermata!</h3>
               } @else {
-                <h3>✗ Errore nella Prenotazione</h3>
+                <h3>&cross; Errore nella Prenotazione</h3>
               }
 
               @if (bookingSummary.error) {
-                <div class="error-message">
-                  {{ bookingSummary.error }}
-                </div>
+                <div class="error-message">{{ bookingSummary.error }}</div>
               }
 
               @if (bookingSummary.confirmed) {
@@ -218,17 +216,13 @@
                   <p><strong>Data:</strong> {{ bookingSummary.date }}</p>
                   <p><strong>Ora:</strong> {{ bookingSummary.time }}</p>
                   <p><strong>Posti:</strong> {{ bookingSummary.seats.join(', ') }}</p>
-                  <p><strong>Totale:</strong> € {{ bookingSummary.totalPrice.toFixed(2) }}</p>
+                  <p><strong>Totale:</strong> &euro; {{ bookingSummary.totalPrice.toFixed(2) }}</p>
                 </div>
               }
 
               <div class="button-group">
-                <button (click)="newBooking()" class="confirm-button">
-                  Nuova Prenotazione
-                </button>
-                <a routerLink="/movies" class="cancel-button">
-                  Torna ai Film
-                </a>
+                <button (click)="newBooking()" class="confirm-button">Nuova Prenotazione</button>
+                <a routerLink="/movies" class="cancel-button">Torna ai Film</a>
               </div>
             </div>
           </div>

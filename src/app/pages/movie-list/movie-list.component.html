@@ -5,7 +5,6 @@
   </div>
 
   <div class="container">
-    <!-- Filters -->
     <div class="filters-section">
       <div class="filter-group">
         <label for="search">Cerca per titolo o regista:</label>
@@ -29,9 +28,7 @@
         >
           <option value="">Tutti i generi</option>
           @for (genre of genres; track genre.id) {
-            <option [value]="genre.id">
-              {{ genre.name }}
-            </option>
+            <option [value]="genre.id">{{ genre.name }}</option>
           }
         </select>
       </div>
@@ -41,22 +38,19 @@
       </button>
     </div>
 
-    <!-- Loading State -->
     @if (loading) {
-      <div class="loading">
+      <div class="loading" role="status">
         <p>Caricamento film...</p>
       </div>
     }
 
-    <!-- Error State -->
     @if (error) {
-      <div class="error">
+      <div class="error" role="alert">
         <p>{{ error }}</p>
         <button (click)="loadMovies()" class="retry-button">Riprova</button>
       </div>
     }
 
-    <!-- Movies Grid -->
     @if (!loading && !error) {
       <div class="movies-list">
         @if (movies.length === 0) {
@@ -67,11 +61,11 @@
 
         <div class="movies-grid">
           @for (movie of movies; track movie.id) {
-            <div class="movie-card">
+            <article class="movie-card">
               <div class="movie-image">
-                <img [src]="movie.poster_url" [alt]="movie.title" />
+                <img [src]="movie.poster_url" [alt]="movie.title" loading="lazy" width="280" height="420" />
                 <div class="movie-overlay">
-                  <a [routerLink]="['/movie', movie.id]" class="book-button">
+                  <a [routerLink]="['/movie', movie.id]" class="book-button" [attr.aria-label]="'Prenota Ora: ' + movie.title">
                     Prenota Ora
                   </a>
                 </div>
@@ -81,43 +75,42 @@
                 <p class="year">{{ movie.year }}</p>
                 <div class="movie-details">
                   <span class="genre">{{ movie.genre }}</span>
-                  <span class="rating">⭐ {{ movie.rating }}</span>
+                  <span class="rating"><span aria-hidden="true">&#11088;</span> <span class="sr-only">Valutazione:</span> {{ movie.rating }}</span>
                 </div>
                 @if (movie.duration) {
-                  <p class="duration">⏱️ {{ movie.duration }} minuti</p>
+                  <p class="duration"><span aria-hidden="true">&#9201;</span> {{ movie.duration }} minuti</p>
                 }
                 @if (movie.director) {
-                  <p class="director">
-                    Regista: {{ movie.director }}
-                  </p>
+                  <p class="director">Regista: {{ movie.director }}</p>
                 }
                 <p class="synopsis">{{ movie.description || 'Sinopsis non disponibile' }}</p>
-                <a [routerLink]="['/movie', movie.id]" class="details-link">
-                  Scopri di più →
+                <a [routerLink]="['/movie', movie.id]" class="details-link" [attr.aria-label]="'Scopri di più su ' + movie.title">
+                  Scopri di pi&ugrave; &rarr;
                 </a>
               </div>
-            </div>
+            </article>
           }
         </div>
 
-        <!-- Pagination -->
         @if (totalPages > 1) {
-          <div class="pagination">
+          <nav class="pagination" aria-label="Paginazione film">
             <button
               class="page-btn"
               [disabled]="currentPage === 1"
               (click)="goToPage(currentPage - 1)"
+              aria-label="Pagina precedente"
             >
-              ‹
+              &lsaquo;
             </button>
 
             @for (p of getPageNumbers(); track $index) {
               @if (p === '...') {
-                <span class="page-dots">...</span>
+                <span class="page-dots" aria-hidden="true">...</span>
               } @else {
                 <button
                   class="page-btn"
                   [class.active]="p === currentPage"
+                  [attr.aria-current]="p === currentPage ? 'page' : null"
                   (click)="goToPage(+p)"
                 >
                   {{ p }}
@@ -129,10 +122,11 @@
               class="page-btn"
               [disabled]="currentPage === totalPages"
               (click)="goToPage(currentPage + 1)"
+              aria-label="Pagina successiva"
             >
-              ›
+              &rsaquo;
             </button>
-          </div>
+          </nav>
         }
       </div>
     }
