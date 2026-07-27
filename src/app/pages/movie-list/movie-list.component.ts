@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Subject, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 import { MovieService } from '../../services/movie.service';
-import { Film } from '../../models';
+import { Film, TmdbGenre } from '../../models';
 
 @Component({
   standalone: true,
@@ -17,23 +18,58 @@ export class MovieListComponent implements OnInit {
   filteredMovies: Film[] = [];
   loading = true;
   error: string | null = null;
-  
+
   searchQuery = '';
-  selectedGenre = '';
-  genres: string[] = [];
+  selectedGenreId = '';
+  genres: TmdbGenre[] = [];
+
+  private searchSubject = new Subject<string>();
 
   constructor(private movieService: MovieService) {}
 
   ngOnInit(): void {
+    this.loadGenres();
     this.loadMovies();
+
+    this.searchSubject.pipe(
+      debounceTime(400),
+      distinctUntilChanged(),
+      switchMap(query => {
+        if (!query.trim()) {
+          return this.selectedGenreId
+            ? this.movieService.getMoviesByGenre(Number(this.selectedGenreId))
+            : this.movieService.getPopularMovies();
+        }
+        return this.movieService.searchMovies(query);
+      })
+    ).subscribe({
+      next: (data) => {
+        this.movies = data;
+        this.applyLocalFilters();
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Errore nella ricerca:', err);
+        this.error = 'Errore nella ricerca film';
+        this.loading = false;
+      }
+    });
+  }
+
+  loadGenres(): void {
+    this.movieService.getAllGenres().subscribe({
+      next: (genres) => this.genres = genres,
+      error: (err) => console.error('Errore nel caricamento dei generi:', err)
+    });
   }
 
   loadMovies(): void {
-    this.movieService.getMovies().subscribe({
+    this.loading = true;
+    this.error = null;
+    this.movieService.getPopularMovies().subscribe({
       next: (data) => {
         this.movies = data;
         this.filteredMovies = data;
-        this.extractGenres();
         this.loading = false;
       },
       error: (err) => {
@@ -44,36 +80,43 @@ export class MovieListComponent implements OnInit {
     });
   }
 
-  extractGenres(): void {
-    const genreSet = new Set<string>();
-    this.movies.forEach(movie => {
-      if (movie.genre) {
-        genreSet.add(movie.genre);
-      }
-    });
-    this.genres = Array.from(genreSet).sort();
-  }
-
-  filterMovies(): void {
-    this.filteredMovies = this.movies.filter(movie => {
-      const matchesSearch = movie.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                          (movie.director && movie.director.toLowerCase().includes(this.searchQuery.toLowerCase()));
-      const matchesGenre = !this.selectedGenre || movie.genre === this.selectedGenre;
-      return matchesSearch && matchesGenre;
-    });
-  }
-
   onSearchChange(): void {
-    this.filterMovies();
+    this.loading = true;
+    this.searchSubject.next(this.searchQuery);
   }
 
   onGenreChange(): void {
-    this.filterMovies();
+    if (!this.selectedGenreId) {
+      this.loadMovies();
+      return;
+    }
+    this.loading = true;
+    this.movieService.getMoviesByGenre(Number(this.selectedGenreId)).subscribe({
+      next: (data) => {
+        this.movies = data;
+        this.applyLocalFilters();
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Errore nel filtro genere:', err);
+        this.error = 'Errore nel filtro per genere';
+        this.loading = false;
+      }
+    });
+  }
+
+  private applyLocalFilters(): void {
+    this.filteredMovies = this.movies.filter(movie => {
+      if (!this.searchQuery.trim()) return true;
+      const q = this.searchQuery.toLowerCase();
+      return movie.title.toLowerCase().includes(q) ||
+             (movie.director && movie.director.toLowerCase().includes(q));
+    });
   }
 
   resetFilters(): void {
     this.searchQuery = '';
-    this.selectedGenre = '';
-    this.filteredMovies = this.movies;
+    this.selectedGenreId = '';
+    this.loadMovies();
   }
 }

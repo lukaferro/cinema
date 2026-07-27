@@ -23,14 +23,14 @@
         <label for="genre">Filtra per genere:</label>
         <select
           id="genre"
-          [(ngModel)]="selectedGenre"
+          [(ngModel)]="selectedGenreId"
           (change)="onGenreChange()"
           class="genre-select"
         >
           <option value="">Tutti i generi</option>
-          @for (genre of genres; track genre) {
-            <option [value]="genre">
-              {{ genre }}
+          @for (genre of genres; track genre.id) {
+            <option [value]="genre.id">
+              {{ genre.name }}
             </option>
           }
         </select>

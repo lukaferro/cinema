@@ -50,7 +50,7 @@ export class MovieDetailsComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
-      this.movieId = params['id'];
+      this.movieId = Number(params['id']);
       this.loadMovieDetails();
     });
   }
