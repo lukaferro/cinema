@@ -259,8 +259,12 @@
 }
 
 .info-icon {
-  font-size: 3rem;
   margin-bottom: 1rem;
+}
+
+.info-icon svg {
+  width: 48px;
+  height: 48px;
 }
 
 .info-card h3 {
