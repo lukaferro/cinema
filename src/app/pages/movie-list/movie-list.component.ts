@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, Inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, Inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -33,6 +33,7 @@ export class MovieListComponent implements OnInit {
 
   constructor(
     private movieService: MovieService,
+    private cdr: ChangeDetectorRef,
     @Inject(DOCUMENT) private document: Document
   ) {}
 
@@ -58,18 +59,23 @@ export class MovieListComponent implements OnInit {
         this.totalPages = res.totalPages;
         this.loading = false;
         this.updateCachedPageNumbers();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Errore nella ricerca:', err);
         this.error = 'Errore nella ricerca film';
         this.loading = false;
+        this.cdr.markForCheck();
       }
     });
   }
 
   loadGenres(): void {
     this.movieService.getAllGenres().subscribe({
-      next: (genres) => this.genres = genres,
+      next: (genres) => {
+        this.genres = genres;
+        this.cdr.markForCheck();
+      },
       error: (err) => console.error('Errore nel caricamento dei generi:', err)
     });
   }
@@ -83,11 +89,13 @@ export class MovieListComponent implements OnInit {
         this.totalPages = res.totalPages;
         this.loading = false;
         this.updateCachedPageNumbers();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Errore nel caricamento dei film:', err);
         this.error = 'Errore nel caricamento dei film. Riprova più tardi.';
         this.loading = false;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -110,11 +118,13 @@ export class MovieListComponent implements OnInit {
         this.totalPages = res.totalPages;
         this.loading = false;
         this.updateCachedPageNumbers();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Errore nel filtro genere:', err);
         this.error = 'Errore nel filtro per genere';
         this.loading = false;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -132,8 +142,9 @@ export class MovieListComponent implements OnInit {
           this.totalPages = res.totalPages;
           this.loading = false;
           this.updateCachedPageNumbers();
+          this.cdr.markForCheck();
         },
-        error: () => { this.loading = false; }
+        error: () => { this.loading = false; this.cdr.markForCheck(); }
       });
     } else if (this.selectedGenreId) {
       this.movieService.getMoviesByGenre(Number(this.selectedGenreId), page).subscribe({
@@ -142,8 +153,9 @@ export class MovieListComponent implements OnInit {
           this.totalPages = res.totalPages;
           this.loading = false;
           this.updateCachedPageNumbers();
+          this.cdr.markForCheck();
         },
-        error: () => { this.loading = false; }
+        error: () => { this.loading = false; this.cdr.markForCheck(); }
       });
     } else {
       this.movieService.getPopularMovies(page).subscribe({
@@ -152,8 +164,9 @@ export class MovieListComponent implements OnInit {
           this.totalPages = res.totalPages;
           this.loading = false;
           this.updateCachedPageNumbers();
+          this.cdr.markForCheck();
         },
-        error: () => { this.loading = false; }
+        error: () => { this.loading = false; this.cdr.markForCheck(); }
       });
     }
   }

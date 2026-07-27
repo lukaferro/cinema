@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -46,7 +46,8 @@ export class MovieDetailsComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private movieService: MovieService
+    private movieService: MovieService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -72,12 +73,14 @@ export class MovieDetailsComponent implements OnInit {
       next: (movie) => {
         this.movie = movie;
         this.loading = false;
+        this.cdr.markForCheck();
         this.loadShowings();
       },
       error: (err) => {
         console.error('Errore nel caricamento del film:', err);
         this.error = 'Errore nel caricamento del film';
         this.loading = false;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -101,11 +104,13 @@ export class MovieDetailsComponent implements OnInit {
         });
         this.showings.sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime());
         this.showingsLoading = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Errore nel caricamento degli orari:', err);
         this.showings = [];
         this.showingsLoading = false;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -115,6 +120,7 @@ export class MovieDetailsComponent implements OnInit {
     this.selectedSeats = [];
     this.generateSeats(showing);
     this.showSeatSelector = true;
+    this.cdr.markForCheck();
 
     setTimeout(() => {
       this.seatSelectorRef?.nativeElement?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -180,6 +186,7 @@ export class MovieDetailsComponent implements OnInit {
         this.selectedSeats.splice(index, 1);
       }
     }
+    this.cdr.markForCheck();
   }
 
   onSeatKeydown(event: KeyboardEvent, seat: Seat): void {
@@ -203,6 +210,7 @@ export class MovieDetailsComponent implements OnInit {
 
     setTimeout(() => {
       this.formSubmitted = true;
+      this.cdr.markForCheck();
 
       if (!this.firstName || !this.lastName || !this.email) return;
 
@@ -229,6 +237,7 @@ export class MovieDetailsComponent implements OnInit {
           this.showBookingSummary = true;
           this.showSeatSelector = false;
           this.bookingLoading = false;
+          this.cdr.markForCheck();
         },
         error: (err) => {
           console.error('Errore nella prenotazione:', err);
@@ -250,6 +259,7 @@ export class MovieDetailsComponent implements OnInit {
           };
           this.showBookingSummary = true;
           this.bookingLoading = false;
+          this.cdr.markForCheck();
         }
       });
     }, 10);
@@ -260,6 +270,7 @@ export class MovieDetailsComponent implements OnInit {
     this.selectedShowing = null;
     this.selectedSeats = [];
     this.formSubmitted = false;
+    this.cdr.markForCheck();
   }
 
   goBack(): void {
@@ -274,5 +285,6 @@ export class MovieDetailsComponent implements OnInit {
     this.lastName = '';
     this.email = '';
     this.formSubmitted = false;
+    this.cdr.markForCheck();
   }
 }

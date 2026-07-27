@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild, ChangeDetectionStrategy, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, ChangeDetectionStrategy, ChangeDetectorRef, NgZone } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MovieService } from '../../services/movie.service';
 import { Film } from '../../models';
@@ -25,19 +25,21 @@ export class HomeComponent implements OnInit, OnDestroy {
   private rafId: number | null = null;
   private autoScrollInterval: ReturnType<typeof setInterval> | null = null;
 
-  constructor(private movieService: MovieService, private ngZone: NgZone) {}
+  constructor(private movieService: MovieService, private ngZone: NgZone, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.movieService.getPopularMovies().subscribe({
       next: (res) => {
         this.movies = res.movies;
         this.loading = false;
+        this.cdr.markForCheck();
         this.startAutoScroll();
       },
       error: (err) => {
         console.error('Errore nel caricamento dei film:', err);
         this.error = 'Errore nel caricamento dei film';
         this.loading = false;
+        this.cdr.markForCheck();
       }
     });
   }
