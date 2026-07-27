@@ -59,14 +59,14 @@
     <!-- Movies Grid -->
     @if (!loading && !error) {
       <div class="movies-list">
-        @if (filteredMovies.length === 0) {
+        @if (movies.length === 0) {
           <div class="no-results">
             <p>Nessun film trovato. Prova a modificare i tuoi filtri.</p>
           </div>
         }
 
         <div class="movies-grid">
-          @for (movie of filteredMovies; track movie.id) {
+          @for (movie of movies; track movie.id) {
             <div class="movie-card">
               <div class="movie-image">
                 <img [src]="movie.poster_url" [alt]="movie.title" />
@@ -97,6 +97,41 @@
             </div>
           }
         </div>
+
+        <!-- Pagination -->
+        @if (totalPages > 1) {
+          <div class="pagination">
+            <button
+              class="page-btn"
+              [disabled]="currentPage === 1"
+              (click)="goToPage(currentPage - 1)"
+            >
+              ‹
+            </button>
+
+            @for (p of getPageNumbers(); track $index) {
+              @if (p === '...') {
+                <span class="page-dots">...</span>
+              } @else {
+                <button
+                  class="page-btn"
+                  [class.active]="p === currentPage"
+                  (click)="goToPage(+p)"
+                >
+                  {{ p }}
+                </button>
+              }
+            }
+
+            <button
+              class="page-btn"
+              [disabled]="currentPage === totalPages"
+              (click)="goToPage(currentPage + 1)"
+            >
+              ›
+            </button>
+          </div>
+        }
       </div>
     }
   </div>

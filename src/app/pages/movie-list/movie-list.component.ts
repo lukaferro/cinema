@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Subject, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { MovieService } from '../../services/movie.service';
 import { Film, TmdbGenre } from '../../models';
 
@@ -15,13 +15,16 @@ import { Film, TmdbGenre } from '../../models';
 })
 export class MovieListComponent implements OnInit {
   movies: Film[] = [];
-  filteredMovies: Film[] = [];
   loading = true;
   error: string | null = null;
 
   searchQuery = '';
   selectedGenreId = '';
   genres: TmdbGenre[] = [];
+
+  currentPage = 1;
+  totalPages = 1;
+  maxVisiblePages = 7;
 
   private searchSubject = new Subject<string>();
 
@@ -35,17 +38,18 @@ export class MovieListComponent implements OnInit {
       debounceTime(400),
       distinctUntilChanged(),
       switchMap(query => {
+        this.currentPage = 1;
         if (!query.trim()) {
           return this.selectedGenreId
-            ? this.movieService.getMoviesByGenre(Number(this.selectedGenreId))
-            : this.movieService.getPopularMovies();
+            ? this.movieService.getMoviesByGenre(Number(this.selectedGenreId), 1)
+            : this.movieService.getPopularMovies(1);
         }
-        return this.movieService.searchMovies(query);
+        return this.movieService.searchMovies(query, 1);
       })
     ).subscribe({
-      next: (data) => {
-        this.movies = data;
-        this.applyLocalFilters();
+      next: (res) => {
+        this.movies = res.movies;
+        this.totalPages = res.totalPages;
         this.loading = false;
       },
       error: (err) => {
@@ -66,10 +70,10 @@ export class MovieListComponent implements OnInit {
   loadMovies(): void {
     this.loading = true;
     this.error = null;
-    this.movieService.getPopularMovies().subscribe({
-      next: (data) => {
-        this.movies = data;
-        this.filteredMovies = data;
+    this.movieService.getPopularMovies(this.currentPage).subscribe({
+      next: (res) => {
+        this.movies = res.movies;
+        this.totalPages = res.totalPages;
         this.loading = false;
       },
       error: (err) => {
@@ -86,15 +90,16 @@ export class MovieListComponent implements OnInit {
   }
 
   onGenreChange(): void {
+    this.currentPage = 1;
     if (!this.selectedGenreId) {
       this.loadMovies();
       return;
     }
     this.loading = true;
-    this.movieService.getMoviesByGenre(Number(this.selectedGenreId)).subscribe({
-      next: (data) => {
-        this.movies = data;
-        this.applyLocalFilters();
+    this.movieService.getMoviesByGenre(Number(this.selectedGenreId), 1).subscribe({
+      next: (res) => {
+        this.movies = res.movies;
+        this.totalPages = res.totalPages;
         this.loading = false;
       },
       error: (err) => {
@@ -105,18 +110,73 @@ export class MovieListComponent implements OnInit {
     });
   }
 
-  private applyLocalFilters(): void {
-    this.filteredMovies = this.movies.filter(movie => {
-      if (!this.searchQuery.trim()) return true;
-      const q = this.searchQuery.toLowerCase();
-      return movie.title.toLowerCase().includes(q) ||
-             (movie.director && movie.director.toLowerCase().includes(q));
-    });
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages || page === this.currentPage) return;
+    this.currentPage = page;
+    this.loading = true;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (this.searchQuery.trim()) {
+      this.movieService.searchMovies(this.searchQuery, page).subscribe({
+        next: (res) => {
+          this.movies = res.movies;
+          this.totalPages = res.totalPages;
+          this.loading = false;
+        },
+        error: () => { this.loading = false; }
+      });
+    } else if (this.selectedGenreId) {
+      this.movieService.getMoviesByGenre(Number(this.selectedGenreId), page).subscribe({
+        next: (res) => {
+          this.movies = res.movies;
+          this.totalPages = res.totalPages;
+          this.loading = false;
+        },
+        error: () => { this.loading = false; }
+      });
+    } else {
+      this.movieService.getPopularMovies(page).subscribe({
+        next: (res) => {
+          this.movies = res.movies;
+          this.totalPages = res.totalPages;
+          this.loading = false;
+        },
+        error: () => { this.loading = false; }
+      });
+    }
+  }
+
+  getPageNumbers(): (number | string)[] {
+    const pages: (number | string)[] = [];
+    const half = Math.floor(this.maxVisiblePages / 2);
+    let start = Math.max(1, this.currentPage - half);
+    let end = Math.min(this.totalPages, start + this.maxVisiblePages - 1);
+
+    if (end - start < this.maxVisiblePages - 1) {
+      start = Math.max(1, end - this.maxVisiblePages + 1);
+    }
+
+    if (start > 1) {
+      pages.push(1);
+      if (start > 2) pages.push('...');
+    }
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    if (end < this.totalPages) {
+      if (end < this.totalPages - 1) pages.push('...');
+      pages.push(this.totalPages);
+    }
+
+    return pages;
   }
 
   resetFilters(): void {
     this.searchQuery = '';
     this.selectedGenreId = '';
+    this.currentPage = 1;
     this.loadMovies();
   }
 }

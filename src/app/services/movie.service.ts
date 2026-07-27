@@ -12,6 +12,10 @@ import {
   TmdbGenreListResponse
 } from '../models';
 
+export interface PaginatedMovies {
+  movies: Film[];
+  totalPages: number;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -68,6 +72,13 @@ export class MovieService {
     };
   }
 
+  private mapListResponse(res: TmdbListResponse): PaginatedMovies {
+    return {
+      movies: res.results.map(m => this.mapTmdbToFilm(m)),
+      totalPages: res.total_pages
+    };
+  }
+
   loadGenres(): Observable<void> {
     if (this.genreCache.size > 0) {
       return of(undefined);
@@ -79,58 +90,58 @@ export class MovieService {
     );
   }
 
-  getPopularMovies(): Observable<Film[]> {
+  getPopularMovies(page = 1): Observable<PaginatedMovies> {
     return this.loadGenres().pipe(
       switchMap(() =>
-        this.get<TmdbListResponse>('/movie/popular', { language: 'it-IT', page: '1' })
+        this.get<TmdbListResponse>('/movie/popular', { language: 'it-IT', page: String(page) })
       ),
-      map(res => res.results.map(m => this.mapTmdbToFilm(m)))
+      map(res => this.mapListResponse(res))
     );
   }
 
-  getNowPlayingMovies(): Observable<Film[]> {
+  getNowPlayingMovies(page = 1): Observable<PaginatedMovies> {
     return this.loadGenres().pipe(
       switchMap(() =>
-        this.get<TmdbListResponse>('/movie/now_playing', { language: 'it-IT', page: '1' })
+        this.get<TmdbListResponse>('/movie/now_playing', { language: 'it-IT', page: String(page) })
       ),
-      map(res => res.results.map(m => this.mapTmdbToFilm(m)))
+      map(res => this.mapListResponse(res))
     );
   }
 
-  getTopRatedMovies(): Observable<Film[]> {
+  getTopRatedMovies(page = 1): Observable<PaginatedMovies> {
     return this.loadGenres().pipe(
       switchMap(() =>
-        this.get<TmdbListResponse>('/movie/top_rated', { language: 'it-IT', page: '1' })
+        this.get<TmdbListResponse>('/movie/top_rated', { language: 'it-IT', page: String(page) })
       ),
-      map(res => res.results.map(m => this.mapTmdbToFilm(m)))
+      map(res => this.mapListResponse(res))
     );
   }
 
-  searchMovies(query: string): Observable<Film[]> {
+  searchMovies(query: string, page = 1): Observable<PaginatedMovies> {
     return this.loadGenres().pipe(
       switchMap(() =>
         this.get<TmdbListResponse>('/search/movie', {
           query,
           language: 'it-IT',
-          page: '1',
+          page: String(page),
           include_adult: 'false'
         })
       ),
-      map(res => res.results.map(m => this.mapTmdbToFilm(m)))
+      map(res => this.mapListResponse(res))
     );
   }
 
-  getMoviesByGenre(genreId: number): Observable<Film[]> {
+  getMoviesByGenre(genreId: number, page = 1): Observable<PaginatedMovies> {
     return this.loadGenres().pipe(
       switchMap(() =>
         this.get<TmdbListResponse>('/discover/movie', {
           with_genres: String(genreId),
           language: 'it-IT',
-          page: '1',
+          page: String(page),
           sort_by: 'popularity.desc'
         })
       ),
-      map(res => res.results.map(m => this.mapTmdbToFilm(m)))
+      map(res => this.mapListResponse(res))
     );
   }
 

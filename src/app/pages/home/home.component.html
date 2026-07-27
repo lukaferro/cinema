@@ -9,7 +9,7 @@
     </div>
   </section>
 
-  <!-- Film in Evidenza -->
+  <!-- Film in Evidenza - Carousel -->
   <section class="featured-movies">
     <div class="container">
       <h2>Film in Evidenza</h2>
@@ -28,25 +28,35 @@
       }
 
       @if (!loading && !error) {
-        <div class="movies-grid">
-          @for (movie of movies; track movie.id) {
-            <div class="movie-card">
-              <div class="movie-image">
-                <img [src]="movie.poster_url" [alt]="movie.title" />
-                <div class="movie-overlay">
-                  <a [routerLink]="['/movie', movie.id]" class="view-button">
-                    Dettagli
-                  </a>
+        <div class="carousel-wrapper">
+          <button class="carousel-btn carousel-btn-left" (click)="scrollLeft()">&#8249;</button>
+
+          <div
+            class="carousel-track"
+            #carouselTrack
+            (mouseenter)="onMouseEnter()"
+            (mouseleave)="onMouseLeave()"
+          >
+            @for (movie of movies; track movie.id) {
+              <div class="movie-card">
+                <div class="movie-image">
+                  <img [src]="movie.poster_url" [alt]="movie.title" />
+                  <div class="movie-overlay">
+                    <a [routerLink]="['/movie', movie.id]" class="view-button">
+                      Dettagli
+                    </a>
+                  </div>
+                </div>
+                <div class="movie-info">
+                  <h3>{{ movie.title }}</h3>
+                  <p class="rating">⭐ {{ movie.rating }}</p>
+                  <p class="genre">{{ movie.genre }}</p>
                 </div>
               </div>
-              <div class="movie-info">
-                <h3>{{ movie.title }}</h3>
-                <p class="rating">⭐ {{ movie.rating }}</p>
-                <p class="genre">{{ movie.genre }}</p>
-                <p class="duration">⏱️ {{ movie.duration }} min</p>
-              </div>
-            </div>
-          }
+            }
+          </div>
+
+          <button class="carousel-btn carousel-btn-right" (click)="scrollRight()">&#8250;</button>
         </div>
       }
     </div>

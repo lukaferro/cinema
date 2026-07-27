@@ -1,0 +1,106 @@
+<div class="contact-page">
+  <section class="page-header">
+    <h1>Contattaci</h1>
+    <p>Siamo a disposizione per qualsiasi domanda</p>
+  </section>
+
+  <div class="container">
+    <div class="contact-grid">
+      <!-- Form -->
+      <div class="contact-form-section">
+        @if (!submitted) {
+          <h2>Inviaci un Messaggio</h2>
+          <form (ngSubmit)="onSubmit()" class="contact-form">
+            <div class="form-group">
+              <label for="name">Nome Completo</label>
+              <input
+                type="text"
+                id="name"
+                [(ngModel)]="name"
+                name="name"
+                placeholder="Il tuo nome"
+                class="form-input"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input
+                type="email"
+                id="email"
+                [(ngModel)]="email"
+                name="email"
+                placeholder="la-tua@email.com"
+                class="form-input"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="message">Messaggio</label>
+              <textarea
+                id="message"
+                [(ngModel)]="message"
+                name="message"
+                placeholder="Scrivi qui il tuo messaggio..."
+                class="form-input form-textarea"
+                rows="5"
+                required
+              ></textarea>
+            </div>
+            <button type="submit" class="submit-button" [disabled]="sending">
+              @if (!sending) {
+                Invia Messaggio
+              } @else {
+                Invio in corso...
+              }
+            </button>
+          </form>
+        } @else {
+          <div class="success-message">
+            <div class="success-icon">&#10003;</div>
+            <h2>Messaggio Inviato!</h2>
+            <p>Grazie per averci contattato. Ti risponderemo il prima possibile.</p>
+            <button (click)="resetForm()" class="submit-button">Invia un Altro Messaggio</button>
+          </div>
+        }
+      </div>
+
+      <!-- Info -->
+      <div class="contact-info-section">
+        <h2>Le Nostre Informazioni</h2>
+
+        <div class="info-item">
+          <div class="info-icon">📍</div>
+          <div>
+            <h3>Indirizzo</h3>
+            <p>Via Roma 123<br>20121 Milano, Italia</p>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-icon">📞</div>
+          <div>
+            <h3>Telefono</h3>
+            <p>+39 123 456 7890</p>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-icon">✉️</div>
+          <div>
+            <h3>Email</h3>
+            <p>info&#64;cinemahub.it</p>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-icon">🕐</div>
+          <div>
+            <h3>Orari di Apertura</h3>
+            <p>Lun - Ven: 12:00 - 23:00<br>Sab - Dom: 11:00 - 00:00</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
