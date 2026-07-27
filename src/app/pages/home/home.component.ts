@@ -21,6 +21,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   isDragging = false;
   private startX = 0;
   private scrollLeftStart = 0;
+  private pendingDx = 0;
+  private rafId: number | null = null;
   private autoScrollInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor(private movieService: MovieService) {}
@@ -85,14 +87,22 @@ export class HomeComponent implements OnInit, OnDestroy {
   onDragMove(e: MouseEvent): void {
     if (!this.isDragging) return;
     e.preventDefault();
-    const el = this.carouselTrack.nativeElement;
-    const dx = e.pageX - this.startX;
-    el.scrollLeft = this.scrollLeftStart - dx;
+    this.pendingDx = e.pageX - this.startX;
+    if (this.rafId === null) {
+      this.rafId = requestAnimationFrame(() => {
+        this.carouselTrack.nativeElement.scrollLeft = this.scrollLeftStart - this.pendingDx;
+        this.rafId = null;
+      });
+    }
   }
 
   onDragEnd(): void {
     if (!this.isDragging) return;
     this.isDragging = false;
+    if (this.rafId !== null) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
+    }
     this.startAutoScroll();
   }
 

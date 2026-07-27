@@ -83,7 +83,9 @@
                   <span class="genre">{{ movie.genre }}</span>
                   <span class="rating">⭐ {{ movie.rating }}</span>
                 </div>
-                <p class="duration">⏱️ {{ movie.duration ? movie.duration + ' minuti' : 'Durata non disponibile' }}</p>
+                @if (movie.duration) {
+                  <p class="duration">⏱️ {{ movie.duration }} minuti</p>
+                }
                 @if (movie.director) {
                   <p class="director">
                     Regista: {{ movie.director }}
