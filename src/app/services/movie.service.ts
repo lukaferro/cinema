@@ -180,11 +180,11 @@ export class MovieService {
     return of(screenings);
   }
 
-  bookSeats(screeningId: number, bookingData: BookingRequest): Observable<unknown> {
+  bookSeats(screeningId: number, bookingData: BookingRequest): Observable<{ id: number; success: boolean; message: string }> {
     return of({
       success: true,
       message: 'Prenotazione confermata!',
-      bookingId: Math.floor(Math.random() * 10000),
+      id: Math.floor(Math.random() * 10000),
       screeningId,
       firstName: bookingData.first_name,
       lastName: bookingData.last_name,
